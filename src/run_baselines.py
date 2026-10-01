@@ -11,7 +11,7 @@ from sklearn.metrics import roc_auc_score
 import features
 import history
 import splits
-from baselines import RULES, order, order_random_ties
+from baselines import MISSING_FIRST, RULES, order, order_random_ties
 from config import BUDGETS, DEV_YEARS, RANDOM_TIE_DRAWS, RESULTS, SEED, SERIOUS, TEST_SCORING_DATE
 
 
@@ -33,11 +33,12 @@ def score_set(ins, labels, scoring_date, rng):
     res = {'n': len(y), 'serious_violators': int(y.sum()), 'any_high_risk': int(y_any.sum()), 'rules': {}}
     ranks = pd.DataFrame(index=f.index)
     for name, (col, _) in RULES.items():
-        o = order(f, col)
+        mf = name in MISSING_FIRST
+        o = order(f, col, mf)
         r = evaluate(o, y)
         r['any_high_risk_recall_at_50'] = evaluate(o, y_any)['recall_at_50']
         k = int(np.ceil(0.5 * len(y)))
-        caps = [y[order_random_ties(f[col], rng)[:k]].sum() / y.sum() for _ in range(RANDOM_TIE_DRAWS)]
+        caps = [y[order_random_ties(f[col], rng, mf)[:k]].sum() / y.sum() for _ in range(RANDOM_TIE_DRAWS)]
         r['random_ties_recall_at_50'] = {'p2.5': float(np.quantile(caps, .025)), 'mean': float(np.mean(caps)),
                                          'p97.5': float(np.quantile(caps, .975))}
         res['rules'][name] = r

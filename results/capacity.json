@@ -1,0 +1,47 @@
+{
+ "old_system": {
+  "2018": {
+   "candidates": 5031,
+   "inspected": 3169,
+   "share": 0.63
+  },
+  "2019": {
+   "candidates": 5065,
+   "inspected": 3187,
+   "share": 0.629
+  },
+  "2020": {
+   "candidates": 5037,
+   "inspected": 1766,
+   "share": 0.351
+  },
+  "2021": {
+   "candidates": 4905,
+   "inspected": 2170,
+   "share": 0.442
+  },
+  "2022": {
+   "candidates": 4768,
+   "inspected": 1473,
+   "share": 0.309
+  },
+  "2023": {
+   "candidates": 4638,
+   "inspected": 1651,
+   "share": 0.356
+  },
+  "2024": {
+   "candidates": 4775,
+   "inspected": 2151,
+   "share": 0.45
+  }
+ },
+ "new_system_first_year": {
+  "window": [
+   "2025-08-11",
+   "2026-07-31"
+  ],
+  "routine_inspections": 2735,
+  "restaurants": 2513
+ }
+}

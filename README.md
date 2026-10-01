@@ -20,8 +20,8 @@ records system's first year (Aug 11, 2025 to Jul 31, 2026); 332 were serious vio
 | Mean high-risk count | 75.4% | 74.2% | 70.5% | 28.9% | 51.5% | 0.667 | 69.3-71.1% |
 | History rate, past three years | 76.0% | 71.8% | 68.7% | 28.2% | 49.1% | 0.673 | 66.3-69.3% |
 | Last-result rule | 69.4% | 66.4% | 68.1% | 27.9% | 49.1% | 0.645 | 61.7-67.2% |
-| Rotation | 57.9% | 51.5% | 57.8% | 23.7% | 38.0% | 0.565 | 57.8% |
-| Most overdue first (current practice) | 53.6% | 53.0% | 55.4% | 22.7% | 36.1% | 0.547 | 55.4% |
+| Most overdue first (current practice) | 61.7% | 56.7% | 58.1% | 23.9% | 37.3% | 0.568 | 58.1% |
+| Rotation | 60.7% | 53.3% | 57.8% | 23.7% | 39.8% | 0.576 | 57.8% |
 | Random order (sanity check) | 50% | 50% | 50% | 20.5% | 30% | 0.500 | |
 
 The last column is the 2.5th to 97.5th percentile of recall when ties in each rule's score are broken at random
@@ -42,7 +42,8 @@ All use only inspection reports known 30 days before the scoring date. Higher sc
 | Mean high-risk count | mean number of high-risk violations per routine inspection |
 
 Ties: every rule orders restaurants by its score, then by the high-risk count at the last routine inspection,
-then by how overdue they are, then by facility ID; missing values sort last. The rule with the best mean
+then by how overdue they are, then by facility ID; missing values sort last, except that the two schedule
+rules treat a restaurant with no known inspection interval as due and put it first. The rule with the best mean
 recall on the development years (2023, 2024) is the chosen baseline.
 
 ## Split
@@ -57,12 +58,18 @@ recall on the development years (2023, 2024) is the chosen baseline.
 Restaurants without a routine inspection in the label window have no label and are left out; they are never
 counted as negatives.
 
+K comes from capacity: ACHD gives a routine inspection to 1,473 to 2,151 candidate restaurants a year in
+2020-2024 and to 2,513 restaurants in the new system's first year (`src/capacity.py`). Ranking changes the order
+of these visits, not their number, so K is the top half of the N inspected restaurants (K = 809 of N = 1,617):
+the visits reached in the first six months.
+
 ## Reproduce
 
 ```bash
 pip install -r requirements.txt
 python src/download_wprdc.py     # public WPRDC tables into data/raw/ (about 150 MB)
 python src/run_baselines.py      # writes results/ in under a minute
+python src/capacity.py           # routine inspections per year, the basis for K
 ```
 
 `data/processed/accela_reports.csv` holds the violation counts parsed from 3,556 new-system inspection reports
@@ -85,8 +92,9 @@ python src/accela/parse_reports.py
 | `src/splits.py` | candidate lists and labels for the development and test sets |
 | `src/baselines.py` | the rules and the tie-breaking order |
 | `src/run_baselines.py` | evaluates every rule; writes `results/` |
+| `src/capacity.py` | counts restaurants given a routine inspection each year (`results/capacity.json`) |
 | `src/accela/` | collects and parses new-system inspection reports |
-| `results/` | `baseline_results.json`, `results_table.md`, `test_rankings.csv` (facility IDs and ranks only) |
+| `results/` | `baseline_results.json`, `results_table.md`, `capacity.json`, `test_rankings.csv` (facility IDs and ranks only) |
 
 ## Data sources
 
