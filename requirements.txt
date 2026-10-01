@@ -1,0 +1,6 @@
+# tested with Python 3.10
+pandas==2.3.3
+numpy==2.2.6
+scikit-learn==1.7.2
+requests==2.34.2
+pypdf==6.13.2

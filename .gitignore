@@ -1,0 +1,5 @@
+data/raw/
+data/accela/
+__pycache__/
+*.pyc
+.DS_Store
