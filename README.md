@@ -58,7 +58,7 @@ recall on the development years (2023, 2024) is the chosen baseline.
 Restaurants without a routine inspection in the label window have no label and are left out; they are never
 counted as negatives.
 
-K comes from capacity: ACHD gives a routine inspection to 1,473 to 2,151 candidate restaurants a year in
+K comes from capacity: ACHD gives a routine inspection to 1,473 to 2,170 candidate restaurants a year in
 2020-2024 and to 2,513 restaurants in the new system's first year (`src/capacity.py`). Ranking changes the order
 of these visits, not their number, so K is the top half of the N inspected restaurants (K = 809 of N = 1,617):
 the visits reached in the first six months.
