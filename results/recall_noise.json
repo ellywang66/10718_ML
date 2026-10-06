@@ -1,0 +1,113 @@
+{
+ "n": 1617,
+ "serious_violators": 332,
+ "draws": 4000,
+ "recall": {
+  "history_rate": {
+   "recall": 72.3,
+   "se": 2.35,
+   "ci95": [
+    67.8,
+    77.1
+   ]
+  },
+  "recency_weighted_rate": {
+   "recall": 70.8,
+   "se": 2.38,
+   "ci95": [
+    66.3,
+    75.7
+   ]
+  },
+  "mean_high_count": {
+   "recall": 70.5,
+   "se": 2.3,
+   "ci95": [
+    65.8,
+    74.9
+   ]
+  },
+  "history_rate_3y": {
+   "recall": 68.7,
+   "se": 2.33,
+   "ci95": [
+    64.3,
+    73.4
+   ]
+  },
+  "last_result": {
+   "recall": 68.1,
+   "se": 2.38,
+   "ci95": [
+    63.4,
+    72.7
+   ]
+  },
+  "rotation": {
+   "recall": 57.8,
+   "se": 2.5,
+   "ci95": [
+    53.0,
+    62.8
+   ]
+  },
+  "most_overdue": {
+   "recall": 58.1,
+   "se": 2.49,
+   "ci95": [
+    53.2,
+    63.0
+   ]
+  }
+ },
+ "difference_from_chosen": {
+  "recency_weighted_rate": {
+   "mean": 1.4,
+   "se": 2.38,
+   "ci95": [
+    -3.3,
+    6.1
+   ]
+  },
+  "mean_high_count": {
+   "mean": 2.0,
+   "se": 1.29,
+   "ci95": [
+    -0.3,
+    4.5
+   ]
+  },
+  "history_rate_3y": {
+   "mean": 3.6,
+   "se": 2.39,
+   "ci95": [
+    -1.0,
+    8.4
+   ]
+  },
+  "last_result": {
+   "mean": 4.3,
+   "se": 2.47,
+   "ci95": [
+    -0.3,
+    9.2
+   ]
+  },
+  "rotation": {
+   "mean": 14.4,
+   "se": 3.66,
+   "ci95": [
+    7.3,
+    21.5
+   ]
+  },
+  "most_overdue": {
+   "mean": 14.4,
+   "se": 3.72,
+   "ci95": [
+    7.1,
+    21.6
+   ]
+  }
+ }
+}
