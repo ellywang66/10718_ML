@@ -77,7 +77,7 @@ python -m src.data.accela.parse_reports
 | `src/models/train_outcome.py`, `src/models/train_lr5.py` | ML outcome models q(x) = P(serious given inspected, x) |
 | `src/models/train_propensity.py` | propensity models P(inspected given selection features), the Bayes-rule score q * e, IPW yield |
 | `src/analysis/capacity.py` | C per scoring date |
-| `src/analysis/diagnostics.py` | diagnostics D1 to D6 |
+| `src/analysis/diagnostics.py` | coverage, selection, base-rate, bound-width, noise, and permit-status diagnostics |
 | `src/analysis/propensity_analysis.py` | tables on the propensity models; saved copy in `results/diagnostics/propensity_analysis.txt` |
 | `tests/` | cutoff and label tests on synthetic rows |
 | `data/processed/` | `panel.parquet`, `accela_reports.csv`, `purpose_values.csv`, `status_values.csv` |

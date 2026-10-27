@@ -16,7 +16,7 @@ sets = {'risk (old inputs)': X_RISK, 'selection (new inputs)': X_SEL, 'union': X
 mk = {fam: m for fam, (_, m) in tp.GRID.items()}
 cfg = {'logistic_regression': {'C': 0.01}, 'gaussian_nb': {'var_smoothing': 1e-9}, 'gradient_boosting': {'learning_rate': 0.03, 'max_iter': 300}}
 
-print('== 1. Forward AUC (train on usable earlier Jan-1 dates, score year V) and in-period 5-fold CV AUC, by feature set and model')
+print('== Forward AUC (train on usable earlier Jan-1 dates, score year V) and in-period 5-fold CV AUC, by feature set and model')
 out = []
 for V in (2022, 2023, 2024):
     d = f'{V}-01-01'; tr = tp.usable(rows, d, True); va = rows[rows.scoring_date == pd.Timestamp(d)]
@@ -31,7 +31,7 @@ pd.set_option('display.width', 250)
 print(df.pivot_table(index=['inputs', 'model'], columns='year', values=['forward_auc', 'inperiod_auc']).round(3).to_string())
 print(df[df.model == 'gradient_boosting'].pivot_table(index='inputs', columns='year', values=['mean_pred', 'observed']).round(3).to_string())
 
-print('\n== 2. Does more history help? GBM on selection inputs, forward AUC at V by training window')
+print('\n== Does more history help? GBM on selection inputs, forward AUC at V by training window')
 for V in (2022, 2023, 2024):
     d = f'{V}-01-01'; va = rows[rows.scoring_date == pd.Timestamp(d)]; tr_all = tp.usable(rows, d, True)
     res = {}
@@ -44,7 +44,7 @@ for V in (2022, 2023, 2024):
         res[label] = (round(roc_auc_score(va.y, m.predict_proba(va[X_SEL])[:, 1]), 3), len(tr))
     print(V, res)
 
-print('\n== 3. Univariate AUC of each selection feature, in period (sign-adjusted), by year')
+print('\n== Univariate AUC of each selection feature, in period (sign-adjusted), by year')
 uni = {}
 for V in (2019, 2022, 2024):
     va = rows[rows.scoring_date == pd.Timestamp(f'{V}-01-01')]
@@ -55,7 +55,7 @@ for V in (2019, 2022, 2024):
         a = roc_auc_score(va.y, x); uni[V][f] = round(max(a, 1 - a), 3)
 print(pd.DataFrame(uni).sort_values(2024, ascending=False).to_string())
 
-print('\n== 4. Inspection rate by days_to_due bucket and by H tier, per year')
+print('\n== Inspection rate by days_to_due bucket and by H tier, per year')
 for V in (2019, 2022, 2024):
     va = rows[rows.scoring_date == pd.Timestamp(f'{V}-01-01')]
     b = pd.cut(va.days_to_due, [-np.inf, -365, -180, -90, 0, 90, 180, np.inf]).astype(str)
@@ -64,13 +64,13 @@ for V in (2019, 2022, 2024):
     print('   by h_tier', va.groupby(va.h_tier.fillna(-1)).y.agg(['mean', 'size']).round(3).T.to_dict())
     print('   by share_years_covered_3y', va.groupby(va.share_years_covered_3y.round(2)).y.agg(['mean', 'size']).round(3).T.to_dict())
 
-print('\n== 5. Calibration of chosen GBM forward model (selection inputs) at 2024, raw deciles')
+print('\n== Calibration of chosen GBM forward model (selection inputs) at 2024, raw deciles')
 d = '2024-01-01'; tr = tp.usable(rows, d, True); va = rows[rows.scoring_date == pd.Timestamp(d)]
 e = mk['gradient_boosting'](cfg['gradient_boosting']).fit(tr[X_SEL], tr.y).predict_proba(va[X_SEL])[:, 1]
 dec = pd.qcut(pd.Series(e).rank(method='first'), 10, labels=False).to_numpy()
 print(pd.DataFrame({'mean_pred': [e[dec == k].mean() for k in range(10)], 'observed': [va.y.to_numpy()[dec == k].mean() for k in range(10)]}).round(3).T.to_string())
 
-print('\n== 6. Aug 11 test-date model (trained on Aug 11 2019-2023 rows): forward AUC on 2025-08-11 (inspected = linked Accela report), by inputs and model')
+print('\n== Aug 11 test-date model (trained on Aug 11 2019-2023 rows): forward AUC on 2025-08-11 (inspected = linked Accela report), by inputs and model')
 d = '2025-08-11'; tr = tp.usable(rows, d, True); va = rows[rows.scoring_date == pd.Timestamp(d)]
 for sname, X in sets.items():
     print(sname, {fam: round(roc_auc_score(va.y, mk[fam](params).fit(tr[X], tr.y).predict_proba(va[X])[:, 1]), 3) for fam, params in cfg.items()})

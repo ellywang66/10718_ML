@@ -1,8 +1,8 @@
 """Must-have diagnostics on the panel. Each writes one JSON file under results/diagnostics/.
 
-D1 coverage against horizon; D2 inspection rate against the rule features; D3 base rates and the test-date
-label counts; D4 unlabeled share of the top C for three rankings; D5 bootstrap noise of two metrics;
-D6 candidates per permit status code. Old-system scoring dates unless noted.
+Coverage against horizon; inspection rate against the rule features; base rates and the test-date label
+counts; unlabeled share of the top C for three rankings; bootstrap noise of two metrics; candidates per permit
+status code. Old-system scoring dates unless noted.
 """
 import json
 
@@ -32,7 +32,7 @@ def share(ins: pd.Series) -> float | None:
     return None if ins.isna().all() else float(ins.dropna().astype(float).mean())
 
 
-def d1_coverage(p: pd.DataFrame) -> dict:
+def coverage(p: pd.DataFrame) -> dict:
     out = {}
     for t, rows in p.groupby('scoring_date'):
         rec = {'n': len(rows), 'months_covered': float(rows.months_covered.iloc[0])}
@@ -45,7 +45,7 @@ def d1_coverage(p: pd.DataFrame) -> dict:
     return out
 
 
-def d2_selection(p: pd.DataFrame) -> dict:
+def selection(p: pd.DataFrame) -> dict:
     out = {}
     for t, rows in jan1(p).groupby('scoring_date'):
         rows = panel.at(p, t)
@@ -63,7 +63,7 @@ def d2_selection(p: pd.DataFrame) -> dict:
     return out
 
 
-def d3_base_rates(p: pd.DataFrame) -> dict:
+def base_rates(p: pd.DataFrame) -> dict:
     out = {'by_scoring_date': {}}
     for t in sorted(p.scoring_date.unique()):
         rows = panel.at(p, t)
@@ -96,7 +96,7 @@ def three_rankings(rows: pd.DataFrame, rng: np.random.Generator) -> dict:
     return {'history_rate': ranks(f, 'history_rate'), 'last_result': ranks(f, 'last_result'), 'random': ranks(rnd, 'score')}
 
 
-def d4_bound_width(p: pd.DataFrame) -> dict:
+def bound_width(p: pd.DataFrame) -> dict:
     rng = np.random.default_rng(SEED)
     out = {}
     for t, rows in jan1(p).groupby('scoring_date'):
@@ -114,7 +114,7 @@ def d4_bound_width(p: pd.DataFrame) -> dict:
     return out
 
 
-def d5_noise(p: pd.DataFrame) -> dict:
+def noise(p: pd.DataFrame) -> dict:
     rng = np.random.default_rng(SEED)
     out = {}
     for t in ('2024-01-01', TEST_SCORING_DATE):
@@ -130,7 +130,7 @@ def d5_noise(p: pd.DataFrame) -> dict:
     return out
 
 
-def d6_status(p: pd.DataFrame) -> dict:
+def status(p: pd.DataFrame) -> dict:
     tab = p.groupby([p.scoring_date.dt.date.astype(str), 'status']).size().unstack(fill_value=0)
     return {'note': 'status is constant within id in the WPRDC dump (a snapshot at dump time); code meanings undocumented',
             'candidates_by_status': {d: row.to_dict() for d, row in tab.iterrows()}}
@@ -139,8 +139,8 @@ def d6_status(p: pd.DataFrame) -> dict:
 def main() -> None:
     p = panel.load()
     DIAGNOSTICS.mkdir(parents=True, exist_ok=True)
-    for name, fn in [('d1_coverage', d1_coverage), ('d2_selection', d2_selection), ('d3_base_rates', d3_base_rates),
-                     ('d4_bound_width', d4_bound_width), ('d5_noise', d5_noise), ('d6_status', d6_status)]:
+    for name, fn in [('coverage', coverage), ('selection', selection), ('base_rates', base_rates),
+                     ('bound_width', bound_width), ('noise', noise), ('status', status)]:
         out = fn(p)
         (DIAGNOSTICS / f'{name}.json').write_text(json.dumps(out, indent=1, default=str))
         print('wrote', name)

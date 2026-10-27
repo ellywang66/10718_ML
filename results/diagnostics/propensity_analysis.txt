@@ -1,4 +1,4 @@
-== 1. Forward AUC (train on usable earlier Jan-1 dates, score year V) and in-period 5-fold CV AUC, by feature set and model
+== Forward AUC (train on usable earlier Jan-1 dates, score year V) and in-period 5-fold CV AUC, by feature set and model
                                            forward_auc               inperiod_auc              
 year                                              2022   2023   2024         2022   2023   2024
 inputs                 model                                                                   
@@ -18,12 +18,12 @@ risk (old inputs)          0.437  0.525  0.310    0.311  0.358  0.452
 selection (new inputs)     0.454  0.483  0.365    0.311  0.358  0.452
 union                      0.433  0.528  0.348    0.311  0.358  0.452
 
-== 2. Does more history help? GBM on selection inputs, forward AUC at V by training window
+== Does more history help? GBM on selection inputs, forward AUC at V by training window
 2022 {'all usable': (0.711, 24652), 'last 1 usable year': (0.706, 5037), 'last 3 usable years': (0.711, 15133), 'pre-2020 only': (0.698, 19615)}
 2023 {'all usable': (0.625, 29556), 'last 1 usable year': (0.605, 4904), 'last 3 usable years': (0.626, 15006), 'pre-2020 only': (0.643, 19615)}
 2024 {'all usable': (0.672, 34324), 'last 1 usable year': (0.671, 4768), 'last 3 usable years': (0.657, 14709), 'pre-2020 only': (0.693, 19615)}
 
-== 3. Univariate AUC of each selection feature, in period (sign-adjusted), by year
+== Univariate AUC of each selection feature, in period (sign-adjusted), by year
                              2019   2022   2024
 days_to_due                 0.711  0.584  0.665
 days_since_last_routine     0.719  0.579  0.661
@@ -48,7 +48,7 @@ sq_feet                     0.501  0.504  0.503
 n_complaint_1y              0.530  0.522  0.503
 last_placard_not_permitted  0.502  0.502  0.502
 
-== 4. Inspection rate by days_to_due bucket and by H tier, per year
+== Inspection rate by days_to_due bucket and by H tier, per year
 2019 overall 0.63
    by days_to_due {'(-180.0, -90.0]': {'mean': 0.587, 'size': 322.0}, '(-365.0, -180.0]': {'mean': 0.314, 'size': 357.0}, '(-90.0, 0.0]': {'mean': 0.713, 'size': 533.0}, '(-inf, -365.0]': {'mean': 0.052, 'size': 574.0}, '(0.0, 90.0]': {'mean': 0.797, 'size': 1103.0}, '(180.0, inf]': {'mean': 0.734, 'size': 1096.0}, '(90.0, 180.0]': {'mean': 0.811, 'size': 820.0}, np.str_('nan'): {'mean': 0.512, 'size': 260.0}}
    by h_tier {-1.0: {'mean': 0.562, 'size': 16.0}, 0.0: {'mean': 0.623, 'size': 4071.0}, 1.0: {'mean': 0.663, 'size': 978.0}}
@@ -62,12 +62,12 @@ last_placard_not_permitted  0.502  0.502  0.502
    by h_tier {-1.0: {'mean': 0.115, 'size': 26.0}, 0.0: {'mean': 0.465, 'size': 4012.0}, 1.0: {'mean': 0.392, 'size': 737.0}}
    by share_years_covered_3y {0.0: {'mean': 0.282, 'size': 762.0}, 0.33: {'mean': 0.367, 'size': 1967.0}, 0.67: {'mean': 0.56, 'size': 1588.0}, 1.0: {'mean': 0.721, 'size': 458.0}}
 
-== 5. Calibration of chosen GBM forward model (selection inputs) at 2024, raw deciles
+== Calibration of chosen GBM forward model (selection inputs) at 2024, raw deciles
                0      1      2      3      4      5      6      7      8      9
 mean_pred  0.030  0.058  0.118  0.249  0.353  0.427  0.493  0.557  0.628  0.735
 observed   0.142  0.266  0.322  0.428  0.510  0.453  0.553  0.586  0.595  0.661
 
-== 6. Aug 11 test-date model (trained on Aug 11 2019-2023 rows): forward AUC on 2025-08-11 (inspected = linked Accela report), by inputs and model
+== Aug 11 test-date model (trained on Aug 11 2019-2023 rows): forward AUC on 2025-08-11 (inspected = linked Accela report), by inputs and model
 risk (old inputs) {'logistic_regression': 0.612, 'gaussian_nb': 0.625, 'gradient_boosting': 0.645}
 selection (new inputs) {'logistic_regression': 0.65, 'gaussian_nb': 0.634, 'gradient_boosting': 0.656}
 union {'logistic_regression': 0.648, 'gaussian_nb': 0.628, 'gradient_boosting': 0.651}
