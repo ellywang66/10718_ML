@@ -1,80 +1,85 @@
-"""Score every non-ML baseline on the development years and the held-out test set.
+"""Score every non-ML baseline rule over the candidate set at the development and test scoring dates.
 
-Metric: recall of serious violators (2+ high-risk violations) among the top K inspected restaurants, with
-K = 50% (main) and 30%; precision at the same K; AUC. Outputs in results/.
+Each rule ranks all candidates at a scoring date. Metrics come from evaluate.py at C = the number of
+candidates ACHD inspected within the horizon (results/capacity.json). The legacy conditional metric
+(recall among inspected restaurants at K = 50% of them) is kept under `legacy_recall_at_50_inspected`,
+because it is still the selection criterion of the rules and of the ML outcome model; nothing here names a
+primary metric. Outputs in results/.
 """
 import json
+
 import numpy as np
 import pandas as pd
-from sklearn.metrics import roc_auc_score
 
-import features
-import history
-import splits
-from baselines import MISSING_FIRST, RULES, order, order_random_ties
-from config import BUDGETS, DEV_YEARS, RANDOM_TIE_DRAWS, RESULTS, SEED, SERIOUS, TEST_SCORING_DATE
+import evaluate
+import panel
+from baselines import MISSING_FIRST, RULES, ranks
+from config import DEV_YEARS, RESULTS, SEED, TEST_SCORING_DATE
 
-
-def evaluate(o, y):
-    n = len(y); out = {}
-    for b in BUDGETS:
-        top = o[:int(np.ceil(b * n))]
-        out[f'recall_at_{int(b * 100)}'] = float(y[top].sum() / y.sum())
-        out[f'precision_at_{int(b * 100)}'] = float(y[top].mean())
-    rank_score = np.empty(n); rank_score[o] = -np.arange(n)
-    out['auc'] = float(roc_auc_score(y, rank_score))
-    return out
+SELECTION_METRIC = 'legacy_recall_at_50_inspected'
+BOOTSTRAP_FIELDS = ('lower_bound_yield', 'conditional_recall')
 
 
-def score_set(ins, labels, scoring_date, rng):
-    f = features.build(ins, labels.id.tolist(), scoring_date)
-    y = (labels.set_index('id').n_high.reindex(f.index) >= SERIOUS).astype(int).to_numpy()
-    y_any = (labels.set_index('id').n_high.reindex(f.index) >= 1).astype(int).to_numpy()
-    res = {'n': len(y), 'serious_violators': int(y.sum()), 'any_high_risk': int(y_any.sum()), 'rules': {}}
-    ranks = pd.DataFrame(index=f.index)
+def legacy_recall_at_50(rows: pd.DataFrame, score_col: str, missing_first: bool) -> float:
+    """Recall among inspected rows when the inspected rows alone are ranked and the top half is taken."""
+    ins = rows[rows.inspected].set_index('id')
+    r = ranks(ins, score_col, missing_first)
+    k = int(np.ceil(len(ins) / 2))
+    top = r <= k
+    return float((ins.serious.to_numpy() & top).sum() / ins.serious.sum())
+
+
+def score_date(rows: pd.DataFrame, bootstrap: bool) -> tuple[dict, pd.DataFrame]:
+    """Metrics of every rule at one scoring date plus the rank table over candidates."""
+    c = int(rows.inspected.sum())
+    ins, ser = rows.inspected.to_numpy(), rows.serious.to_numpy()
+    res = {'n_candidates': len(rows), 'C': c, 'serious_among_inspected': int(ser.sum()), 'rules': {}}
+    rank_table = rows[['id']].copy()
+    f = rows.set_index('id')
     for name, (col, _) in RULES.items():
         mf = name in MISSING_FIRST
-        o = order(f, col, mf)
-        r = evaluate(o, y)
-        r['any_high_risk_recall_at_50'] = evaluate(o, y_any)['recall_at_50']
-        k = int(np.ceil(0.5 * len(y)))
-        caps = [y[order_random_ties(f[col], rng, mf)[:k]].sum() / y.sum() for _ in range(RANDOM_TIE_DRAWS)]
-        r['random_ties_recall_at_50'] = {'p2.5': float(np.quantile(caps, .025)), 'mean': float(np.mean(caps)),
-                                         'p97.5': float(np.quantile(caps, .975))}
-        res['rules'][name] = r
-        rank = np.empty(len(o), int); rank[o] = np.arange(1, len(o) + 1); ranks[f'rank_{name}'] = rank
-    ranks['serious_violator'] = y
-    return res, ranks
+        r = ranks(f, col, mf)
+        m = evaluate.to_dict(evaluate.metrics(r, ins, ser, c))
+        m[SELECTION_METRIC] = legacy_recall_at_50(rows, col, mf)
+        if bootstrap:
+            m['bootstrap'] = {k: evaluate.bootstrap_metric(k, r, ins, ser, c, seed=SEED) for k in BOOTSTRAP_FIELDS}
+        res['rules'][name] = m
+        rank_table[f'rank_{name}'] = r
+    rank_table['inspected'] = ins
+    rank_table['serious'] = ser
+    return res, rank_table
 
 
-def table(results):
-    lines = ['| Baseline | Dev 2023 recall@50% | Dev 2024 recall@50% | Test recall@50% | Test precision@50% | '
-             'Test recall@30% | Test AUC | Test recall@50%, random ties |', '|---|---:|---:|---:|---:|---:|---:|---:|']
+def table(results: dict, dates: list[str]) -> str:
+    """Markdown table of lower-bound yield, conditional recall, and the legacy metric per date."""
+    head = '| Rule | ' + ' | '.join(f'{d} yield@C | {d} cond. recall@C | {d} legacy recall@50%' for d in dates) + ' |'
+    lines = [head, '|---|' + '---:|' * (3 * len(dates))]
     for name in RULES:
-        d23, d24, t = (results[s]['rules'][name] for s in ('dev2023', 'dev2024', 'test'))
-        rt = t['random_ties_recall_at_50']
-        lines.append(f"| {name} | {d23['recall_at_50']:.1%} | {d24['recall_at_50']:.1%} | {t['recall_at_50']:.1%} | "
-                     f"{t['precision_at_50']:.1%} | {t['recall_at_30']:.1%} | {t['auc']:.3f} | {rt['p2.5']:.1%}-{rt['p97.5']:.1%} |")
+        cells = []
+        for d in dates:
+            m = results[d]['rules'][name]
+            cells += [f"{m['lower_bound_yield']:.3f}", f"{m['conditional_recall']:.1%}", f"{m[SELECTION_METRIC]:.1%}"]
+        lines.append(f'| {name} | ' + ' | '.join(cells) + ' |')
+    achd = ' | '.join(f"{results[d]['rules']['history_rate']['achd_yield']:.3f} (C={results[d]['C']})" for d in dates)
+    lines.append(f'\nACHD observed yield at C: {achd}')
     return '\n'.join(lines)
 
 
-def main():
-    rng = np.random.default_rng(SEED)
-    ins = history.load_inspections()
-    results = {'rules': {k: v[1] for k, v in RULES.items()}}
-    for year in DEV_YEARS:
-        results[f'dev{year}'], _ = score_set(ins, splits.dev_set(ins, year), f'{year}-01-01', rng)
-    results['test'], ranks = score_set(ins, splits.test_set(ins), TEST_SCORING_DATE, rng)
-    dev_mean = {k: np.mean([results[f'dev{y}']['rules'][k]['recall_at_50'] for y in DEV_YEARS]) for k in RULES}
+def main() -> None:
+    p = panel.load()
+    dates = [f'{y}-01-01' for y in DEV_YEARS] + [TEST_SCORING_DATE]
+    results = {'rules': {k: v[1] for k, v in RULES.items()}, 'selection_metric': SELECTION_METRIC,
+               'test_C': 'linked_candidates (see results/capacity.json)'}
+    for d in dates:
+        results[d], rank_table = score_date(panel.at(p, d), bootstrap=(d == TEST_SCORING_DATE))
+    dev_mean = {k: float(np.mean([results[f'{y}-01-01']['rules'][k][SELECTION_METRIC] for y in DEV_YEARS])) for k in RULES}
     results['chosen_on_dev'] = max(dev_mean, key=dev_mean.get)
     RESULTS.mkdir(exist_ok=True)
     (RESULTS / 'baseline_results.json').write_text(json.dumps(results, indent=1))
-    (RESULTS / 'results_table.md').write_text(table(results) + '\n')
-    ranks.to_csv(RESULTS / 'test_rankings.csv')
-    for s in ('dev2023', 'dev2024', 'test'):
-        print(s, 'n', results[s]['n'], 'serious', results[s]['serious_violators'])
-    print('chosen on development years:', results['chosen_on_dev'])
-    print(table(results))
+    (RESULTS / 'results_table.md').write_text(table(results, dates) + '\n')
+    rank_table.to_csv(RESULTS / 'test_rankings.csv', index=False)
+    print('chosen on development dates by', SELECTION_METRIC + ':', results['chosen_on_dev'])
+    print(table(results, dates))
 
 
 if __name__ == '__main__':

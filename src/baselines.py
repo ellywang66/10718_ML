@@ -32,3 +32,11 @@ def order_random_ties(score, rng, missing_first=False):
     """Order by the score alone, ties broken at random."""
     s = np.nan_to_num(np.asarray(score, float), nan=np.inf if missing_first else -np.inf)
     return np.lexsort((rng.random(len(s)), -s))
+
+
+def ranks(f, score_col, missing_first=False):
+    """1-based rank per row of f (1 = inspect first), with the same total order as `order`."""
+    o = order(f, score_col, missing_first)
+    r = np.empty(len(o), dtype=int)
+    r[o] = np.arange(1, len(o) + 1)
+    return r

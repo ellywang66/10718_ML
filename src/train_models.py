@@ -1,14 +1,14 @@
-"""Train and select ML models on the same split and metric as the non-ML baselines.
+"""Train and select ML outcome models q(x) = P(serious | inspected, x) on the panel, and score the candidate set.
 
-Training rows: one per (restaurant, scoring year t), t = 2016..2024. Features at Jan 1 of t (ml_features.py);
-label = serious violator (2+ high-risk violations) at the restaurant's first routine inspection in calendar year t,
-the same label as the development years. A row is usable for a model scored on date T only if its label report
-was known before T (inspection date + 30 days < T).
+Training rows: panel rows with inspected = 1 at the Jan 1 scoring dates (2016 on). A row is usable for a model
+applied at date T only if its label was known before T (first routine inspection date + 30 days < T).
 
-Selection: for each development year V in (2023, 2024), fit on rows with t < V whose label was known before
-Jan 1 of V, and rank that year's development set. The configuration with the best mean recall in the top 50%
-over the two years (ties: mean AUC) is the final model. It is refit on every row known before Jan 1, 2025 and
-scored once on the held-out test set, together with the history-rate baseline. Writes results/ml_*.
+Selection: for each development date V, fit on usable rows with scoring date before V and rank V's candidates.
+The criterion is the legacy conditional metric (recall among inspected candidates at K = 50% of them), recorded
+in the output as `q_selection_metric`; it is kept for continuity, not chosen as the task metric. The chosen
+configuration is refit on everything usable before the test date and scored once on the test candidates.
+Writes results/ml_results.json, results/ml_runs.json, results/ml_test_rankings.csv, and results/q_scores.parquet
+(the chosen model's q for every candidate at the development and test dates, read by train_propensity.py).
 """
 import itertools
 import json
@@ -23,16 +23,16 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
-import history
+import evaluate
 import ml_features
-import splits
-from baselines import order
-from config import DEV_YEARS, REPORT_LAG_DAYS, RESULTS, SEED, SERIOUS, TEST_SCORING_DATE
-from run_baselines import evaluate
+import panel
+from baselines import ranks
+from config import DEV_YEARS, REPORT_LAG_DAYS, RESULTS, SEED, TEST_SCORING_DATE
+from run_baselines import BOOTSTRAP_FIELDS, SELECTION_METRIC, legacy_recall_at_50
 
-TRAIN_YEARS = range(2016, 2025)   # 2014-2015 serve only as history
 LAG = pd.Timedelta(days=REPORT_LAG_DAYS)
 X = ml_features.FEATURES
+Q_SCORES = RESULTS / 'q_scores.parquet'
 
 
 def imputed(model):
@@ -57,135 +57,143 @@ GRID = {
 }
 
 
-def configs():
-    for family, (grid, make) in GRID.items():
+def configs(families=GRID):
+    """Every (family, params, constructor) in the grid."""
+    for family, (grid, make) in families.items():
         keys = list(grid)
         for values in itertools.product(*(grid[k] for k in keys)):
             yield family, dict(zip(keys, values)), make
 
 
-def labeled(ins, year):
-    lab = splits.dev_set(ins, year)
-    f = ml_features.build(ins, lab.id.tolist(), f'{year}-01-01')
-    f['y'] = (lab.set_index('id').n_high.reindex(f.index) >= SERIOUS).astype(int).to_numpy()
-    f['label_known'] = (lab.set_index('id').date.reindex(f.index) + LAG).to_numpy()
-    f['year'] = year
-    return f
+def training_rows(p: pd.DataFrame) -> pd.DataFrame:
+    """Inspected rows at the Jan 1 scoring dates with their label-known date."""
+    jan = p[p.scoring_date.dt.month.eq(1) & p.scoring_date.dt.day.eq(1)]
+    parts = [panel.at(jan, t) for t in sorted(jan.scoring_date.unique())]
+    rows = pd.concat(parts, ignore_index=True)
+    rows = rows[rows.inspected].copy()
+    rows['label_known'] = rows.first_routine_date + LAG
+    rows['y'] = rows.serious.astype(int)
+    return rows
 
 
-def train_rows(rows, scoring_date):
+def usable(rows: pd.DataFrame, scoring_date) -> pd.DataFrame:
+    """Training rows whose scoring date precedes T and whose label was known before T."""
     t = pd.Timestamp(scoring_date)
-    return rows[(rows.year < t.year) & (rows.label_known < t)]
+    return rows[(rows.scoring_date < t) & (rows.label_known < t)]
 
 
-def rank_eval(score, f, y):
-    g = f[['last_result', 'overdue']].copy()
-    g['score'] = score
-    o = order(g, 'score')
-    return o, evaluate(o, y)
+def score_candidates(score: np.ndarray, cand: pd.DataFrame, bootstrap: bool = False) -> tuple[np.ndarray, dict]:
+    """Rank all candidates by a score and compute every metric at C = number inspected."""
+    f = cand.set_index('id')[['last_result', 'overdue']].copy()
+    f['score'] = score
+    r = ranks(f, 'score')
+    ins, ser = cand.inspected.to_numpy(), cand.serious.to_numpy()
+    c = int(ins.sum())
+    m = evaluate.to_dict(evaluate.metrics(r, ins, ser, c))
+    tmp = cand.copy(); tmp['score'] = score
+    m[SELECTION_METRIC] = legacy_recall_at_50(tmp, 'score', False)
+    if bootstrap:
+        m['bootstrap'] = {k: evaluate.bootstrap_metric(k, r, ins, ser, c, seed=SEED) for k in BOOTSTRAP_FIELDS}
+    return r, m
 
 
-def main():
-    t0 = time.time()
-    ins = history.load_inspections()
-    rows = pd.concat([labeled(ins, y) for y in TRAIN_YEARS])
-    print('training rows by year:', rows.groupby('year').y.agg(['size', 'mean']).round(3).to_dict('index'))
-
-    # model selection on the development years
-    runs = []
-    for family, params, make in configs():
-        r = dict(family=family, params=params)
-        for v in DEV_YEARS:
-            tr, dv = train_rows(rows, f'{v}-01-01'), rows[rows.year == v]
-            m = make(params).fit(tr[X], tr.y)
-            _, ev = rank_eval(m.predict_proba(dv[X])[:, 1], dv, dv.y.to_numpy())
-            r[f'dev{v}'] = ev
-        r['dev_mean_recall_at_50'] = float(np.mean([r[f'dev{v}']['recall_at_50'] for v in DEV_YEARS]))
-        r['dev_mean_auc'] = float(np.mean([r[f'dev{v}']['auc'] for v in DEV_YEARS]))
-        runs.append(r)
-        print(f"{family:20s} {params} dev recall@50 {r['dev_mean_recall_at_50']:.3f}")
-    key = lambda r: (r['dev_mean_recall_at_50'], r['dev_mean_auc'])
-    chosen = max(runs, key=key)
-    family_best = {fam: max((r for r in runs if r['family'] == fam), key=key) for fam in GRID}
-
-    # baseline on the development years, computed the same way
-    base_dev = {v: rank_eval(rows[rows.year == v].history_rate.to_numpy(), rows[rows.year == v],
-                             rows[rows.year == v].y.to_numpy())[1] for v in DEV_YEARS}
-
-    # held-out test: refit each family's dev-best config on everything known before the test scoring date
-    test_lab = splits.test_set(ins)
-    ft = ml_features.build(ins, test_lab.id.tolist(), TEST_SCORING_DATE)
-    yt = (test_lab.set_index('id').n_high.reindex(ft.index) >= SERIOUS).astype(int).to_numpy()
-    month = test_lab.set_index('id').date.reindex(ft.index)
-    tr = train_rows(rows, TEST_SCORING_DATE)
-    make = {fam: mk for fam, (_, mk) in GRID.items()}
-    ranks = pd.DataFrame(index=ft.index)
-    test = {}
-    o, test['history_rate_rule'] = rank_eval(ft.history_rate.to_numpy(), ft, yt)
-    ranks['rank_history_rate_rule'] = np.argsort(o) + 1
-    for fam, r in family_best.items():
-        m = make[fam](r['params']).fit(tr[X], tr.y)
-        o, test[fam] = rank_eval(m.predict_proba(ft[X])[:, 1], ft, yt)
-        ranks[f'rank_{fam}'] = np.argsort(o) + 1
-    ranks['serious_violator'] = yt
-
-    # bootstrap the recall difference, chosen model minus the history-rate rule
-    rng = np.random.default_rng(SEED)
-    k = int(np.ceil(len(yt) / 2))
-    top_m = (ranks[f"rank_{chosen['family']}"] <= k).to_numpy()
-    top_b = (ranks['rank_history_rate_rule'] <= k).to_numpy()
-    diffs = []
-    for _ in range(4000):
-        i = rng.integers(0, len(yt), len(yt))
-        diffs.append(100 * ((yt[i] * top_m[i]).sum() - (yt[i] * top_b[i]).sum()) / yt[i].sum())
-    diffs = np.array(diffs)
-
-    # where does the model do worse? recall within subgroups of the test set (same global top K)
-    ft['_y'], ft['_m'], ft['_b'] = yt, top_m, top_b
-    nr = ft.n_routine
+def subgroups(cand: pd.DataFrame, top_m: np.ndarray, top_b: np.ndarray) -> dict:
+    """Where the model and the baseline differ: recall among inspected and share of the top C, by subgroup."""
+    nr = cand.n_routine
     groups = {
-        'label in Aug-Dec 2025': month.dt.year.eq(2025).to_numpy(),
-        'label in Jan-Jul 2026': month.dt.year.eq(2026).to_numpy(),
-        'City of Pittsburgh': ft.municipal.str.contains('Pittsburgh', case=False).to_numpy(),
-        'outside Pittsburgh': ~ft.municipal.str.contains('Pittsburgh', case=False).to_numpy(),
-        'chain': ft.is_chain.eq(1).to_numpy(), 'independent': ft.is_chain.eq(0).to_numpy(),
-        'with liquor': ft.has_liquor.eq(1).to_numpy(), 'without liquor': ft.has_liquor.eq(0).to_numpy(),
+        'City of Pittsburgh': cand.municipal.str.contains('Pittsburgh', case=False).to_numpy(),
+        'outside Pittsburgh': ~cand.municipal.str.contains('Pittsburgh', case=False).to_numpy(),
+        'chain': cand.is_chain.eq(1).to_numpy(), 'independent': cand.is_chain.eq(0).to_numpy(),
+        'with liquor': cand.has_liquor.eq(1).to_numpy(), 'without liquor': cand.has_liquor.eq(0).to_numpy(),
         'no routine history': nr.eq(0).to_numpy(), '1-3 past routine inspections': nr.between(1, 3).to_numpy(),
         '4+ past routine inspections': (nr >= 4).to_numpy(),
     }
-    sub = {}
+    out = {}
+    y = cand.serious.to_numpy()
     for name, mask in groups.items():
-        g = ft[mask]
-        pos = int(g._y.sum())
-        sub[name] = dict(n=int(mask.sum()), serious=pos,
-                         model_recall=float((g._y & g._m).sum() / pos) if pos else None,
-                         baseline_recall=float((g._y & g._b).sum() / pos) if pos else None,
-                         model_share_in_top=float(g._m.mean()), baseline_share_in_top=float(g._b.mean()))
+        pos = int(y[mask].sum())
+        out[name] = dict(n_candidates=int(mask.sum()), n_inspected=int(cand.inspected.to_numpy()[mask].sum()), serious=pos,
+                         model_recall=float((y & top_m)[mask].sum() / pos) if pos else None,
+                         baseline_recall=float((y & top_b)[mask].sum() / pos) if pos else None,
+                         model_share_in_top=float(top_m[mask].mean()), baseline_share_in_top=float(top_b[mask].mean()))
+    return out
 
-    # inspected vs. not inspected: how the test set differs from the full Jan 1, 2025 candidate list
-    cand = splits.candidates(ins, TEST_SCORING_DATE)
-    fc = ml_features.build(ins, cand, TEST_SCORING_DATE)
-    insp = fc.index.isin(ft.index)
-    cols = ['history_rate', 'last_result', 'overdue', 'days_since_last_routine', 'n_routine']
-    inspected_vs_not = {'n_inspected': int(insp.sum()), 'n_not_inspected': int((~insp).sum()),
-                        'inspected_mean': fc[insp][cols].mean().round(3).to_dict(),
-                        'not_inspected_mean': fc[~insp][cols].mean().round(3).to_dict()}
+
+def main() -> None:
+    t0 = time.time()
+    p = panel.load()
+    rows = training_rows(p)
+    dev_dates = [f'{y}-01-01' for y in DEV_YEARS]
+    print('training rows by scoring date:', rows.groupby(rows.scoring_date.dt.year).y.agg(['size', 'mean']).round(3).to_dict('index'))
+
+    # model selection on the development dates
+    dev_cand = {d: panel.at(p, d) for d in dev_dates}
+    runs, dev_scores = [], {}
+    for family, params, make in configs():
+        r = dict(family=family, params=params)
+        for d in dev_dates:
+            tr = usable(rows, d)
+            m = make(params).fit(tr[X], tr.y)
+            q = m.predict_proba(dev_cand[d][X])[:, 1]
+            r[f'dev{d[:4]}'] = score_candidates(q, dev_cand[d])[1]
+            dev_scores[(family, json.dumps(params, sort_keys=True), d)] = q
+        r['dev_mean_selection'] = float(np.mean([r[f'dev{d[:4]}'][SELECTION_METRIC] for d in dev_dates]))
+        r['dev_mean_lower_bound_yield'] = float(np.mean([r[f'dev{d[:4]}']['lower_bound_yield'] for d in dev_dates]))
+        runs.append(r)
+        print(f"{family:20s} {params} dev {SELECTION_METRIC} {r['dev_mean_selection']:.3f}")
+    key = lambda r: (r['dev_mean_selection'], r['dev_mean_lower_bound_yield'])
+    chosen = max(runs, key=key)
+    family_best = {fam: max((r for r in runs if r['family'] == fam), key=key) for fam in GRID}
+
+    # the history-rate rule on the same candidate sets
+    base_dev = {d: score_candidates(dev_cand[d].history_rate.to_numpy(), dev_cand[d])[1] for d in dev_dates}
+
+    # held-out test: refit each family's dev-best config on everything usable before the test date
+    test_cand = panel.at(p, TEST_SCORING_DATE)
+    tr = usable(rows, TEST_SCORING_DATE)
+    make = {fam: mk for fam, (_, mk) in GRID.items()}
+    rank_table = test_cand[['id', 'inspected', 'serious']].copy()
+    test, test_scores = {}, {}
+    r_b, test['history_rate_rule'] = score_candidates(test_cand.history_rate.to_numpy(), test_cand, bootstrap=True)
+    rank_table['rank_history_rate_rule'] = r_b
+    for fam, r in family_best.items():
+        m = make[fam](r['params']).fit(tr[X], tr.y)
+        test_scores[fam] = m.predict_proba(test_cand[X])[:, 1]
+        r_m, test[fam] = score_candidates(test_scores[fam], test_cand, bootstrap=(fam == chosen['family']))
+        rank_table[f'rank_{fam}'] = r_m
+
+    # q scores of the chosen configuration for every candidate at the development and test dates
+    q_parts = []
+    for d in dev_dates:
+        q_parts.append(pd.DataFrame({'scoring_date': pd.Timestamp(d), 'id': dev_cand[d].id,
+                                     'q': dev_scores[(chosen['family'], json.dumps(chosen['params'], sort_keys=True), d)]}))
+    q_parts.append(pd.DataFrame({'scoring_date': pd.Timestamp(TEST_SCORING_DATE), 'id': test_cand.id, 'q': test_scores[chosen['family']]}))
+    pd.concat(q_parts, ignore_index=True).to_parquet(Q_SCORES, index=False)
+
+    # bootstrap of the chosen model minus the rule on the test date
+    c = int(test_cand.inspected.sum())
+    r_m = rank_table[f"rank_{chosen['family']}"].to_numpy()
+    ins, ser = test_cand.inspected.to_numpy(), test_cand.serious.to_numpy()
+    diff = {}
+    for field in BOOTSTRAP_FIELDS:
+        def stat(idx, field=field):
+            return (getattr(evaluate.metrics(r_m[idx], ins[idx], ser[idx], c), field)
+                    - getattr(evaluate.metrics(r_b[idx], ins[idx], ser[idx], c), field))
+        diff[field] = dict(point=float(test[chosen['family']][field] - test['history_rate_rule'][field]),
+                           **evaluate.bootstrap(stat, len(r_m), seed=SEED))
 
     out = dict(
-        train_rows={int(y): dict(n=int(len(g)), serious_rate=round(float(g.y.mean()), 3)) for y, g in rows.groupby('year')},
-        n_test_train_rows=int(len(tr)), features=X, n_configs=len(runs),
+        train_rows={str(y): dict(n=int(len(g)), serious_rate=round(float(g.y.mean()), 3)) for y, g in rows.groupby(rows.scoring_date.dt.year)},
+        n_test_train_rows=int(len(tr)), features=X, n_configs=len(runs), q_selection_metric=SELECTION_METRIC,
         chosen=dict(family=chosen['family'], params=chosen['params']),
-        family_best={f: dict(params=r['params'], dev2023=r['dev2023'], dev2024=r['dev2024']) for f, r in family_best.items()},
-        baseline_dev={str(v): e for v, e in base_dev.items()},
-        test=test,
-        difference_vs_baseline=dict(points=round(100 * (test[chosen['family']]['recall_at_50'] - test['history_rate_rule']['recall_at_50']), 1),
-                                    bootstrap_se=round(float(diffs.std()), 2),
-                                    ci95=[round(float(x), 1) for x in np.percentile(diffs, [2.5, 97.5])]),
-        subgroups=sub, inspected_vs_not=inspected_vs_not, runtime_s=round(time.time() - t0))
+        family_best={f: {k: r[k] for k in r if k != 'family'} for f, r in family_best.items()},
+        baseline_dev=base_dev, test=test, test_C=c, difference_vs_baseline=diff,
+        subgroups=subgroups(test_cand, evaluate.top_mask(r_m, c), evaluate.top_mask(r_b, c)),
+        runtime_s=round(time.time() - t0))
     RESULTS.mkdir(exist_ok=True)
     (RESULTS / 'ml_results.json').write_text(json.dumps(out, indent=1, default=str))
     (RESULTS / 'ml_runs.json').write_text(json.dumps(runs, indent=1, default=str))
-    ranks.to_csv(RESULTS / 'ml_test_rankings.csv')
+    rank_table.to_csv(RESULTS / 'ml_test_rankings.csv', index=False)
     print(json.dumps({k: out[k] for k in ('chosen', 'test', 'difference_vs_baseline')}, indent=1, default=str))
 
 

@@ -1,0 +1,39 @@
+{
+ "note": "old = purpose==Initial, calendar-year label, <= known cutoff (the setup in doc.txt); new = purpose_types.csv routine class, 12-month window from Jan 1, < known cutoff. Metric: history-rate rule recall among inspected at K = 50% of inspected.",
+ "2023": {
+  "old": {
+   "n": 1651,
+   "serious": 183,
+   "recall50": 0.7868852459016393,
+   "candidates": 4638
+  },
+  "new": {
+   "n": 1658,
+   "serious": 187,
+   "recall50": 0.7754010695187166,
+   "candidates": 4635
+  },
+  "inspected_only_old": 2,
+  "inspected_only_new": 9,
+  "shared_same_first_date": 1648,
+  "shared": 1649
+ },
+ "2024": {
+  "old": {
+   "n": 2151,
+   "serious": 330,
+   "recall50": 0.7727272727272727,
+   "candidates": 4775
+  },
+  "new": {
+   "n": 2157,
+   "serious": 332,
+   "recall50": 0.7710843373493976,
+   "candidates": 4775
+  },
+  "inspected_only_old": 0,
+  "inspected_only_new": 6,
+  "shared_same_first_date": 2150,
+  "shared": 2151
+ }
+}

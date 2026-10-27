@@ -1,47 +1,120 @@
 {
- "old_system": {
-  "2018": {
+ "horizon_months": 12,
+ "by_scoring_date": {
+  "2016-01-01": {
+   "candidates": 4538,
+   "inspected": 3552,
+   "share": 0.783,
+   "serious": 580,
+   "label_source": "old_system"
+  },
+  "2017-01-01": {
+   "candidates": 4981,
+   "inspected": 3305,
+   "share": 0.664,
+   "serious": 404,
+   "label_source": "old_system"
+  },
+  "2018-01-01": {
    "candidates": 5031,
-   "inspected": 3169,
-   "share": 0.63
+   "inspected": 3176,
+   "share": 0.631,
+   "serious": 466,
+   "label_source": "old_system"
   },
-  "2019": {
+  "2019-01-01": {
    "candidates": 5065,
-   "inspected": 3187,
-   "share": 0.629
+   "inspected": 3193,
+   "share": 0.63,
+   "serious": 419,
+   "label_source": "old_system"
   },
-  "2020": {
+  "2019-08-11": {
+   "candidates": 5044,
+   "inspected": 2173,
+   "share": 0.431,
+   "serious": 264,
+   "label_source": "old_system"
+  },
+  "2020-01-01": {
    "candidates": 5037,
-   "inspected": 1766,
-   "share": 0.351
+   "inspected": 1886,
+   "share": 0.374,
+   "serious": 176,
+   "label_source": "old_system"
   },
-  "2021": {
-   "candidates": 4905,
-   "inspected": 2170,
-   "share": 0.442
+  "2020-08-11": {
+   "candidates": 4964,
+   "inspected": 2868,
+   "share": 0.578,
+   "serious": 214,
+   "label_source": "old_system"
   },
-  "2022": {
+  "2021-01-01": {
+   "candidates": 4904,
+   "inspected": 2845,
+   "share": 0.58,
+   "serious": 234,
+   "label_source": "old_system"
+  },
+  "2021-08-11": {
+   "candidates": 4815,
+   "inspected": 1737,
+   "share": 0.361,
+   "serious": 179,
+   "label_source": "old_system"
+  },
+  "2022-01-01": {
    "candidates": 4768,
-   "inspected": 1473,
-   "share": 0.309
+   "inspected": 1482,
+   "share": 0.311,
+   "serious": 139,
+   "label_source": "old_system"
   },
-  "2023": {
-   "candidates": 4638,
-   "inspected": 1651,
-   "share": 0.356
+  "2022-08-11": {
+   "candidates": 4702,
+   "inspected": 1575,
+   "share": 0.335,
+   "serious": 164,
+   "label_source": "old_system"
   },
-  "2024": {
+  "2023-01-01": {
+   "candidates": 4635,
+   "inspected": 1658,
+   "share": 0.358,
+   "serious": 187,
+   "label_source": "old_system"
+  },
+  "2023-08-11": {
+   "candidates": 4718,
+   "inspected": 1736,
+   "share": 0.368,
+   "serious": 236,
+   "label_source": "old_system"
+  },
+  "2024-01-01": {
    "candidates": 4775,
-   "inspected": 2151,
-   "share": 0.45
+   "inspected": 2157,
+   "share": 0.452,
+   "serious": 332,
+   "label_source": "old_system"
+  },
+  "2025-08-11": {
+   "candidates": 4664,
+   "inspected": 1719,
+   "share": 0.369,
+   "serious": 347,
+   "label_source": "accela_linked"
   }
  },
- "new_system_first_year": {
-  "window": [
+ "test_date": {
+  "scoring_date": "2025-08-11",
+  "linked_candidates": 1719,
+  "wprdc_restaurants": 2513,
+  "wprdc_routine_inspections": 2735,
+  "wprdc_window": [
    "2025-08-11",
    "2026-07-31"
-  ],
-  "routine_inspections": 2735,
-  "restaurants": 2513
+  ]
  }
 }
