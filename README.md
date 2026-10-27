@@ -29,7 +29,8 @@ restaurants in the WPRDC new-system table (that table carries no old-system id).
 ## Results
 
 `results/results_table.md` and `results/baseline_results.json` hold the non-ML rules, `results/ml_results.json`
-the outcome models, `results/propensity_results.json` the P(inspected) experiment, and `results/diagnostics/`
+the outcome models, `results/propensity_results.json` the P(inspected) experiment (`results/propensity_report.md`
+is its written report), and `results/diagnostics/`
 the coverage, selection, base-rate, bound-width, noise, and permit-status diagnostics.
 
 ## Reproduce
