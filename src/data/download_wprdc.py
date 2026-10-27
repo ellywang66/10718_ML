@@ -3,7 +3,7 @@ import json
 from datetime import date
 
 import requests
-from config import RAW, WPRDC
+from src.config import RAW, WPRDC
 
 
 def main() -> None:

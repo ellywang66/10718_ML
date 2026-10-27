@@ -6,8 +6,8 @@ scoring date (inspection date + 30 days < scoring date), the same rule as the ba
 import numpy as np
 import pandas as pd
 
-import features
-from config import REPORT_LAG_DAYS
+from src.features import rates
+from src.config import REPORT_LAG_DAYS
 
 BASE = ['history_rate', 'history_rate_3y', 'recent_weighted_rate', 'mean_high_count', 'last_result',
         'days_since_last_routine', 'overdue', 'n_routine']
@@ -55,7 +55,7 @@ def extra_features(g, cutoff):
 def build(ins, ids, cutoff):
     """Feature table (one row per id) at one scoring date, plus the municipality used only for subgroup analysis."""
     cutoff = pd.Timestamp(cutoff)
-    base = features.build(ins, ids, cutoff)
+    base = rates.build(ins, ids, cutoff)
     groups = dict(tuple(ins[ins.id.isin(set(ids))].groupby('id', sort=False)))
     empty = ins.iloc[:0]
     extra = pd.DataFrame([extra_features(groups.get(i, empty), cutoff) for i in ids], index=base.index)

@@ -1,15 +1,15 @@
 """Simple ML baseline promised in the baselines assignment: logistic regression on five history features.
 
-Same training rows, development dates, grid, selection criterion and test evaluation as train_models.py,
+Same training rows, development dates, grid, selection criterion and test evaluation as train_outcome.py,
 restricted to the logistic-regression family and five features. Writes results/ml_lr5_results.json.
 """
 import json
 
 import numpy as np
 
-import panel
-import train_models as tm
-from config import DEV_YEARS, RESULTS, TEST_SCORING_DATE
+from src import panel
+from src.models import train_outcome as tm
+from src.config import DEV_YEARS, RESULTS, TEST_SCORING_DATE
 
 X5 = ['history_rate', 'last_result', 'days_since_last_routine', 'n_routine', 'n_complaint_1y']
 

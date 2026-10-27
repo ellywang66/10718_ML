@@ -23,15 +23,15 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
-import evaluate
-import ml_features
-import panel
-from baselines import ranks
-from config import DEV_YEARS, REPORT_LAG_DAYS, RESULTS, SEED, TEST_SCORING_DATE
-from run_baselines import BOOTSTRAP_FIELDS, SELECTION_METRIC, legacy_recall_at_50
+from src import evaluate
+from src.features import risk
+from src import panel
+from src.models.baselines import ranks
+from src.config import DEV_YEARS, REPORT_LAG_DAYS, RESULTS, SEED, TEST_SCORING_DATE
+from src.models.run_baselines import BOOTSTRAP_FIELDS, SELECTION_METRIC, legacy_recall_at_50
 
 LAG = pd.Timedelta(days=REPORT_LAG_DAYS)
-X = ml_features.FEATURES
+X = risk.FEATURES
 Q_SCORES = RESULTS / 'q_scores.parquet'
 
 

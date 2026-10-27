@@ -6,19 +6,17 @@ attached to them. Migrated records keep the old facility ID as their record numb
 Resumable; writes one JSON line per restaurant to data/accela/collection.<shard>.jsonl and PDFs under
 data/accela/pdfs/. Takes about a day at one request per second; run several shards in parallel.
 
-Usage: python src/accela/collect_reports.py <shard> <n_shards> [limit]
+Usage: python -m src.data.accela.collect_reports <shard> <n_shards> [limit]
 """
 import json
 import re
 import sys
 import time
-from pathlib import Path
 
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import session as C  # noqa: E402
-from config import RAW, ROOT  # noqa: E402
+from src.config import RAW, ROOT
+from src.data.accela import session as C
 
 OUT = ROOT / 'data' / 'accela'
 

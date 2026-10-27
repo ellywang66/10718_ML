@@ -1,14 +1,16 @@
 """Analysis tables for the inspection-decision models: forward vs in-period AUC by inputs and model, training-window
 sensitivity, univariate AUCs, inspection rate by schedule bucket, calibration, test-date AUC. Prints to stdout;
 the saved copy is results/diagnostics/propensity_analysis.txt."""
-import sys, json; sys.path.insert(0, __file__.rsplit('/', 1)[0])
+import json
 import numpy as np, pandas as pd
 from sklearn.metrics import roc_auc_score, brier_score_loss
 from sklearn.model_selection import StratifiedKFold, cross_val_predict
-import panel, ml_features, selection_features, train_propensity as tp
-from config import SEED
+from src import panel
+from src.features import risk, selection
+from src.models import train_propensity as tp
+from src.config import SEED
 p = panel.load(); rows = tp.all_rows(p)
-X_RISK, X_SEL = ml_features.FEATURES, selection_features.SELECTION_FEATURES
+X_RISK, X_SEL = risk.FEATURES, selection.SELECTION_FEATURES
 X_UNION = X_RISK + [c for c in X_SEL if c not in X_RISK]
 sets = {'risk (old inputs)': X_RISK, 'selection (new inputs)': X_SEL, 'union': X_UNION}
 mk = {fam: m for fam, (_, m) in tp.GRID.items()}

@@ -11,10 +11,10 @@ import json
 import numpy as np
 import pandas as pd
 
-import evaluate
-import panel
-from baselines import MISSING_FIRST, RULES, ranks
-from config import DEV_YEARS, RESULTS, SEED, TEST_SCORING_DATE
+from src import evaluate
+from src import panel
+from src.models.baselines import MISSING_FIRST, RULES, ranks
+from src.config import DEV_YEARS, RESULTS, SEED, TEST_SCORING_DATE
 
 SELECTION_METRIC = 'legacy_recall_at_50_inspected'
 BOOTSTRAP_FIELDS = ('lower_bound_yield', 'conditional_recall')

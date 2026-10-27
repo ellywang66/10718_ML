@@ -9,8 +9,8 @@ import json
 
 import pandas as pd
 
-import panel
-from config import HORIZON_MONTHS, RAW, RESULTS, TEST_SCORING_DATE, TEST_WINDOW
+from src import panel
+from src.config import HORIZON_MONTHS, RAW, RESULTS, TEST_SCORING_DATE, TEST_WINDOW
 
 
 def main() -> None:

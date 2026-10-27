@@ -9,10 +9,10 @@ import json
 import numpy as np
 import pandas as pd
 
-import evaluate
-import panel
-from baselines import ranks
-from config import DAYS_PER_MONTH, DIAGNOSTICS, PROCESSED, SEED, SERIOUS, TEST_SCORING_DATE
+from src import evaluate
+from src import panel
+from src.models.baselines import ranks
+from src.config import DAYS_PER_MONTH, DIAGNOSTICS, PROCESSED, SEED, SERIOUS, TEST_SCORING_DATE
 
 HORIZONS = (6, 12, 18, 24)
 NR_BUCKETS = {'0': lambda n: n.eq(0), '1-3': lambda n: n.between(1, 3), '4+': lambda n: n >= 4}

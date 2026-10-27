@@ -13,10 +13,10 @@ import sys
 import numpy as np
 import pandas as pd
 
-import history
-import ml_features
-import selection_features
-from config import (ACCELA_DATA_END, ACCELA_START, DAYS_PER_MONTH, HORIZON_MONTHS, LOOKBACK_YEARS, OLD_DATA_END, PROCESSED,
+from src.data import history
+from src.features import risk
+from src.features import selection
+from src.config import (ACCELA_DATA_END, ACCELA_START, DAYS_PER_MONTH, HORIZON_MONTHS, LOOKBACK_YEARS, OLD_DATA_END, PROCESSED,
                     REPORT_LAG_DAYS, RESTAURANT, SCORING_DATES, SERIOUS)
 
 LAG = pd.Timedelta(days=REPORT_LAG_DAYS)
@@ -92,8 +92,8 @@ def label_source(ins: pd.DataFrame, t: pd.Timestamp) -> tuple[pd.DataFrame, pd.T
 def rows_at(ins: pd.DataFrame, t: pd.Timestamp, roster: pd.DataFrame) -> pd.DataFrame:
     """One panel row per candidate at t: snapshot columns, outcome features, selection features, labels."""
     cand = candidates(ins, t)
-    feats = ml_features.build(ins, cand.index.tolist(), t)
-    sel = selection_features.build(ins, roster, cand, t)
+    feats = risk.build(ins, cand.index.tolist(), t)
+    sel = selection.build(ins, roster, cand, t)
     events, data_end = label_source(ins, t)
     labs = labels(events, cand.index, t, data_end)
     out = pd.concat([cand[['status', 'description', 'zip']], feats, sel, labs], axis=1)
@@ -104,7 +104,7 @@ def rows_at(ins: pd.DataFrame, t: pd.Timestamp, roster: pd.DataFrame) -> pd.Data
 def build(ins: pd.DataFrame, scoring_dates=SCORING_DATES) -> pd.DataFrame:
     """Panel over all scoring dates."""
     parts = []
-    roster = selection_features.load_roster()
+    roster = selection.load_roster()
     for d in scoring_dates:
         t = pd.Timestamp(d)
         p = rows_at(ins, t, roster)

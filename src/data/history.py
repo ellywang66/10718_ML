@@ -1,7 +1,7 @@
 """One row per old-system inspection (Jan 2014 to Jul 2025) with its violation counts, critical-category count,
 reinspection flag, and inspection type.
 
-Inspection types come from src/purpose_types.csv, which maps every observed `purpose` value to one of
+Inspection types come from src/data/purpose_types.csv, which maps every observed `purpose` value to one of
 routine, complaint, reinspection, new_facility, other. `routine` is the only type used for labels.
 Columns that never vary within a restaurant in this dump (status, description, municipal, bus_st_date,
 category_cd) are facility snapshots at dump time, not point-in-time values.
@@ -9,7 +9,7 @@ category_cd) are facility snapshots at dump time, not point-in-time values.
 from pathlib import Path
 
 import pandas as pd
-from config import RAW
+from src.config import RAW
 
 PURPOSE_TYPES = Path(__file__).with_name('purpose_types.csv')
 TYPES = ('routine', 'complaint', 'reinspection', 'new_facility', 'other')

@@ -6,7 +6,7 @@ inspections out of n has rate (s + 0.6) / (n + 2); a restaurant with no routine 
 """
 import numpy as np
 import pandas as pd
-from config import REPORT_LAG_DAYS
+from src.config import REPORT_LAG_DAYS
 
 PRIOR_A, PRIOR_B = 0.6, 1.4
 

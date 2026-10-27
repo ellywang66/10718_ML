@@ -1,12 +1,9 @@
 """Cutoff and label logic of src/panel.py on a small synthetic inspection table."""
-import sys
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
-import panel  # noqa: E402
+from src import panel
+from src.features import selection
 
 T = pd.Timestamp('2020-01-01')
 
@@ -71,13 +68,12 @@ def test_horizon_and_coverage():
 
 
 def test_selection_h_tier_and_calendar_year():
-    import selection_features
     ins = make_ins()
     ins['n_critical'] = [3, 0, 0, 0, 0, 0, 0]
     ins['reispt_cd'] = ['1', '2', '2', '2', '2', '2', '2']
     roster = pd.DataFrame({'seat_count': [50.0], 'sq_feet': [np.nan], 'fdo': ['2010-03-15']}, index=pd.Index(['A'], name='id'))
     cand = panel.candidates(ins, T)
-    f = selection_features.build(ins, roster, cand, T)
+    f = selection.build(ins, roster, cand, T)
     assert f.loc['A', 'h_tier'] == 1 and f.loc['D', 'h_tier'] == 0
     assert f.loc['A', 'days_to_due'] == (pd.Timestamp('2019-06-01') + pd.Timedelta(days=180) - T).days
     assert f.loc['A', 'routine_this_year'] == 0 and f.loc['A', 'cal_years_since_routine'] == 1

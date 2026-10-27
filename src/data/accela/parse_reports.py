@@ -8,15 +8,12 @@ Inspector names are not written out.
 """
 import json
 import re
-import sys
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pypdf
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from config import PROCESSED, ROOT  # noqa: E402
+from src.config import PROCESSED, ROOT
 
 OUT = ROOT / 'data' / 'accela'
 

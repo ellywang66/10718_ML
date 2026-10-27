@@ -20,7 +20,7 @@ Feature groups, from the data survey of 2026-10-26:
 import numpy as np
 import pandas as pd
 
-from config import RAW, REPORT_LAG_DAYS
+from src.config import RAW, REPORT_LAG_DAYS
 
 LAG = pd.Timedelta(days=REPORT_LAG_DAYS)
 H_TIER_DUE_DAYS = 180       # ACHD revisits high-frequency facilities in five to seven months

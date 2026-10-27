@@ -1,7 +1,7 @@
 """The P(inspected) experiment: a propensity model e(x) = P(I = 1 | x) and the Bayes-rule score s = q * e.
 
 Training rows: every candidate at the Jan 1 scoring dates, target inspected within 12 months. The inputs are
-the inspection-decision features in selection_features.SELECTION_FEATURES (schedule tier, calendar-year status,
+the inspection-decision features in selection.SELECTION_FEATURES (schedule tier, calendar-year status,
 own and area coverage, permit anniversary, size, complaints, placard), not the outcome model's risk features.
 A scoring date t can train a model applied at T only when t + 12 months + 30 days <= T, because a negative
 label is unknown before then.
@@ -34,16 +34,16 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-import evaluate
-import ml_features
-import panel
-import selection_features
-import train_models
-from baselines import ranks
-from config import DAYS_PER_MONTH, DEV_YEARS, HORIZON_MONTHS, REPORT_LAG_DAYS, RESULTS, SEED, TEST_SCORING_DATE
+from src import evaluate
+from src.features import risk
+from src import panel
+from src.features import selection
+from src.models import train_outcome
+from src.models.baselines import ranks
+from src.config import DAYS_PER_MONTH, DEV_YEARS, HORIZON_MONTHS, REPORT_LAG_DAYS, RESULTS, SEED, TEST_SCORING_DATE
 
-X = selection_features.SELECTION_FEATURES     # inputs of e
-X_Q = ml_features.FEATURES                     # inputs of q
+X = selection.SELECTION_FEATURES     # inputs of e
+X_Q = risk.FEATURES                     # inputs of q
 X_UNION = X_Q + [c for c in X if c not in X_Q]
 VALIDATION_YEARS = (2022, 2023, 2024)
 IPW_FLOORS = (0.02, 0.05)
@@ -126,15 +126,15 @@ def main() -> None:
     t0 = time.time()
     p = panel.load()
     rows = all_rows(p)
-    q_scores = pd.read_parquet(train_models.Q_SCORES)
+    q_scores = pd.read_parquet(train_outcome.Q_SCORES)
     make = {fam: mk for fam, (_, mk) in GRID.items()}
     q_cfg = json.loads((RESULTS / 'ml_results.json').read_text())['chosen']
-    make_q = {fam: mk for fam, (_, mk) in train_models.GRID.items()}[q_cfg['family']]
-    q_rows = train_models.training_rows(p)
+    make_q = {fam: mk for fam, (_, mk) in train_outcome.GRID.items()}[q_cfg['family']]
+    q_rows = train_outcome.training_rows(p)
 
     # forward validation of the propensity models
     runs = []
-    for family, params, mk in train_models.configs(GRID):
+    for family, params, mk in train_outcome.configs(GRID):
         r = dict(family=family, params=params)
         for v in VALIDATION_YEARS:
             d = f'{v}-01-01'
@@ -167,7 +167,7 @@ def main() -> None:
         tr = usable(rows, d, same_day=True)
         e = make[chosen['family']](chosen['params']).fit(tr[X], tr.y).predict_proba(cand[X])[:, 1]
         e_shift = shift_to_mean(e, c / len(cand))
-        trq = train_models.usable(q_rows, d)
+        trq = train_outcome.usable(q_rows, d)
         q_union = make_q(q_cfg['params']).fit(trq[X_UNION], trq.y).predict_proba(cand[X_UNION])[:, 1]
         scores = {'q': q, 'q_union': q_union, 'e_forecast': e, 's_raw': q * e, 's_shifted': q * e_shift,
                   's_union': q_union * e, 'history_rate': cand.history_rate.to_numpy()}
