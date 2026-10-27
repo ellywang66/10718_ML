@@ -1,0 +1,73 @@
+== 1. Forward AUC (train on usable earlier Jan-1 dates, score year V) and in-period 5-fold CV AUC, by feature set and model
+                                           forward_auc               inperiod_auc              
+year                                              2022   2023   2024         2022   2023   2024
+inputs                 model                                                                   
+risk (old inputs)      gaussian_nb               0.624  0.590  0.650        0.657  0.626  0.660
+                       gradient_boosting         0.695  0.615  0.672        0.723  0.657  0.698
+                       logistic_regression       0.638  0.585  0.651        0.666  0.634  0.691
+selection (new inputs) gaussian_nb               0.654  0.611  0.681        0.673  0.636  0.687
+                       gradient_boosting         0.711  0.625  0.672        0.801  0.754  0.756
+                       logistic_regression       0.652  0.578  0.647        0.686  0.650  0.705
+union                  gaussian_nb               0.642  0.599  0.662        0.664  0.631  0.675
+                       gradient_boosting         0.711  0.635  0.677        0.806  0.750  0.751
+                       logistic_regression       0.661  0.583  0.650        0.695  0.650  0.706
+                       mean_pred               observed              
+year                        2022   2023   2024     2022   2023   2024
+inputs                                                               
+risk (old inputs)          0.437  0.525  0.310    0.311  0.358  0.452
+selection (new inputs)     0.454  0.483  0.365    0.311  0.358  0.452
+union                      0.433  0.528  0.348    0.311  0.358  0.452
+
+== 2. Does more history help? GBM on selection inputs, forward AUC at V by training window
+2022 {'all usable': (0.711, 24652), 'last 1 usable year': (0.706, 5037), 'last 3 usable years': (0.711, 15133), 'pre-2020 only': (0.698, 19615)}
+2023 {'all usable': (0.625, 29556), 'last 1 usable year': (0.605, 4904), 'last 3 usable years': (0.626, 15006), 'pre-2020 only': (0.643, 19615)}
+2024 {'all usable': (0.672, 34324), 'last 1 usable year': (0.671, 4768), 'last 3 usable years': (0.657, 14709), 'pre-2020 only': (0.693, 19615)}
+
+== 3. Univariate AUC of each selection feature, in period (sign-adjusted), by year
+                             2019   2022   2024
+days_to_due                 0.711  0.584  0.665
+days_since_last_routine     0.719  0.579  0.661
+cal_years_since_routine     0.715  0.618  0.658
+share_years_covered_3y      0.709  0.634  0.647
+days_since_any              0.720  0.577  0.631
+routine_per_year            0.705  0.601  0.624
+muni_coverage_prev_year     0.558  0.557  0.602
+zip_coverage_prev_year      0.566  0.563  0.593
+n_routine                   0.642  0.557  0.573
+is_chain                    0.553  0.581  0.564
+zip_share_visits_90d        0.501  0.564  0.534
+n_critical_last             0.515  0.512  0.529
+reinsp_required_last        0.502  0.509  0.527
+zip_complaints_90d          0.508  0.549  0.525
+has_liquor                  0.519  0.520  0.520
+h_tier                      0.513  0.504  0.519
+months_to_anniversary       0.500  0.505  0.518
+seat_count                  0.544  0.545  0.514
+n_service_1y                0.505  0.506  0.508
+sq_feet                     0.501  0.504  0.503
+n_complaint_1y              0.530  0.522  0.503
+last_placard_not_permitted  0.502  0.502  0.502
+
+== 4. Inspection rate by days_to_due bucket and by H tier, per year
+2019 overall 0.63
+   by days_to_due {'(-180.0, -90.0]': {'mean': 0.587, 'size': 322.0}, '(-365.0, -180.0]': {'mean': 0.314, 'size': 357.0}, '(-90.0, 0.0]': {'mean': 0.713, 'size': 533.0}, '(-inf, -365.0]': {'mean': 0.052, 'size': 574.0}, '(0.0, 90.0]': {'mean': 0.797, 'size': 1103.0}, '(180.0, inf]': {'mean': 0.734, 'size': 1096.0}, '(90.0, 180.0]': {'mean': 0.811, 'size': 820.0}, np.str_('nan'): {'mean': 0.512, 'size': 260.0}}
+   by h_tier {-1.0: {'mean': 0.562, 'size': 16.0}, 0.0: {'mean': 0.623, 'size': 4071.0}, 1.0: {'mean': 0.663, 'size': 978.0}}
+   by share_years_covered_3y {0.0: {'mean': 0.412, 'size': 328.0}, 0.33: {'mean': 0.356, 'size': 990.0}, 0.67: {'mean': 0.582, 'size': 1463.0}, 1.0: {'mean': 0.812, 'size': 2284.0}}
+2022 overall 0.311
+   by days_to_due {'(-180.0, -90.0]': {'mean': 0.343, 'size': 248.0}, '(-365.0, -180.0]': {'mean': 0.178, 'size': 236.0}, '(-90.0, 0.0]': {'mean': 0.355, 'size': 417.0}, '(-inf, -365.0]': {'mean': 0.098, 'size': 938.0}, '(0.0, 90.0]': {'mean': 0.481, 'size': 1080.0}, '(180.0, inf]': {'mean': 0.306, 'size': 868.0}, '(90.0, 180.0]': {'mean': 0.372, 'size': 715.0}, np.str_('nan'): {'mean': 0.237, 'size': 266.0}}
+   by h_tier {-1.0: {'mean': 0.269, 'size': 26.0}, 0.0: {'mean': 0.309, 'size': 3928.0}, 1.0: {'mean': 0.322, 'size': 814.0}}
+   by share_years_covered_3y {0.0: {'mean': 0.181, 'size': 419.0}, 0.33: {'mean': 0.196, 'size': 1379.0}, 0.67: {'mean': 0.331, 'size': 1829.0}, 1.0: {'mean': 0.465, 'size': 1141.0}}
+2024 overall 0.452
+   by days_to_due {'(-180.0, -90.0]': {'mean': 0.503, 'size': 336.0}, '(-365.0, -180.0]': {'mean': 0.395, 'size': 526.0}, '(-90.0, 0.0]': {'mean': 0.622, 'size': 307.0}, '(-inf, -365.0]': {'mean': 0.278, 'size': 1536.0}, '(0.0, 90.0]': {'mean': 0.645, 'size': 597.0}, '(180.0, inf]': {'mean': 0.56, 'size': 570.0}, '(90.0, 180.0]': {'mean': 0.633, 'size': 458.0}, np.str_('nan'): {'mean': 0.378, 'size': 445.0}}
+   by h_tier {-1.0: {'mean': 0.115, 'size': 26.0}, 0.0: {'mean': 0.465, 'size': 4012.0}, 1.0: {'mean': 0.392, 'size': 737.0}}
+   by share_years_covered_3y {0.0: {'mean': 0.282, 'size': 762.0}, 0.33: {'mean': 0.367, 'size': 1967.0}, 0.67: {'mean': 0.56, 'size': 1588.0}, 1.0: {'mean': 0.721, 'size': 458.0}}
+
+== 5. Calibration of chosen GBM forward model (selection inputs) at 2024, raw deciles
+               0      1      2      3      4      5      6      7      8      9
+mean_pred  0.030  0.058  0.118  0.249  0.353  0.427  0.493  0.557  0.628  0.735
+observed   0.142  0.266  0.322  0.428  0.510  0.453  0.553  0.586  0.595  0.661
+
+== 6. Aug 11 test-date model (trained on Aug 11 2019-2023 rows): forward AUC on 2025-08-11 (inspected = linked Accela report), by inputs and model
+risk (old inputs) {'logistic_regression': 0.612, 'gaussian_nb': 0.625, 'gradient_boosting': 0.645}
+selection (new inputs) {'logistic_regression': 0.65, 'gaussian_nb': 0.634, 'gradient_boosting': 0.656}
+union {'logistic_regression': 0.648, 'gaussian_nb': 0.628, 'gradient_boosting': 0.651}
