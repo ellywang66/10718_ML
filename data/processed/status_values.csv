@@ -1,0 +1,7 @@
+status,inspections,restaurants,varies_within_id,note
+1,78091,8600,False,"constant within id in this dump: a facility snapshot at dump time, not a point-in-time value; code meanings undocumented"
+7,45360,7821,False,"constant within id in this dump: a facility snapshot at dump time, not a point-in-time value; code meanings undocumented"
+9,705,148,False,"constant within id in this dump: a facility snapshot at dump time, not a point-in-time value; code meanings undocumented"
+0,498,76,False,"constant within id in this dump: a facility snapshot at dump time, not a point-in-time value; code meanings undocumented"
+6,13,6,False,"constant within id in this dump: a facility snapshot at dump time, not a point-in-time value; code meanings undocumented"
+2,7,1,False,"constant within id in this dump: a facility snapshot at dump time, not a point-in-time value; code meanings undocumented"

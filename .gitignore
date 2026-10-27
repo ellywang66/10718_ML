@@ -3,3 +3,5 @@ data/accela/
 __pycache__/
 *.pyc
 .DS_Store
+.venv
+data/processed/panel.parquet
