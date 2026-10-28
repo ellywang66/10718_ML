@@ -1,10 +1,10 @@
 """Candidate lists and labels for the development years and the held-out test year.
 
 Candidates on a scoring date: restaurants whose most recent known record (known 30 days after the inspection,
-on or before the scoring date) became known within the three years before that date, and whose most recent
-record is filed under a restaurant category.
+strictly before the scoring date, the same cutoff as the features) became known within the three years before
+that date, and whose most recent record is filed under a restaurant category.
 
-Development (scoring date Jan 1, 2023 and Jan 1, 2024): label = the first routine inspection (purpose "Initial")
+Development (scoring date Jan 1, 2023 and Jan 1, 2024): label = the first routine inspection (src/purpose_types.csv)
 of that calendar year, from the old-system violations table.
 Test (scoring date Jan 1, 2025): label = the first routine ("Comprehensive") inspection between Aug 11, 2025
 and Jul 31, 2026, from the new-system inspection reports (data/processed/accela_reports.csv).
@@ -18,7 +18,7 @@ LAG = pd.Timedelta(days=REPORT_LAG_DAYS)
 
 def candidates(ins, scoring_date):
     t = pd.Timestamp(scoring_date)
-    known = ins[ins.date + LAG <= t]
+    known = ins[ins.date + LAG < t]
     last = known.sort_values(['date', 'encounter']).drop_duplicates('id', keep='last')
     keep = (last.date + LAG > t - pd.DateOffset(years=CANDIDATE_YEARS)) & last.description.isin(RESTAURANT)
     return last.loc[keep, 'id'].tolist()
@@ -26,7 +26,7 @@ def candidates(ins, scoring_date):
 
 def dev_set(ins, year):
     cand = set(candidates(ins, f'{year}-01-01'))
-    first = (ins[ins.purpose.eq('Initial') & (ins.date.dt.year == year) & ins.id.isin(cand)]
+    first = (ins[ins.routine & (ins.date.dt.year == year) & ins.id.isin(cand)]
              .sort_values(['id', 'date']).drop_duplicates('id'))
     return first[['id', 'date', 'n_high']].reset_index(drop=True)
 
