@@ -1,0 +1,314 @@
+{
+ "1_test": {
+  "n": 1616,
+  "serious": 332,
+  "K": 808,
+  "K30": 485
+ },
+ "2_dev_selection": {
+  "families": {
+   "LR": {
+    "n_configs": 10,
+    "worst_mean_dev": 78.0,
+    "best_mean_dev": 82.6
+   },
+   "RF": {
+    "n_configs": 12,
+    "worst_mean_dev": 79.1,
+    "best_mean_dev": 82.6
+   },
+   "GB": {
+    "n_configs": 16,
+    "worst_mean_dev": 77.7,
+    "best_mean_dev": 82.4
+   },
+   "DT": {
+    "n_configs": 6,
+    "worst_mean_dev": 76.1,
+    "best_mean_dev": 78.8
+   },
+   "LR5": {
+    "n_configs": 10,
+    "worst_mean_dev": 74.4,
+    "best_mean_dev": 76.6
+   }
+  },
+  "rule_mean_dev": 77.3,
+  "lr_configs_below_rule": 0
+ },
+ "3_chosen": {
+  "family": "random_forest",
+  "params": {
+   "max_depth": null,
+   "min_samples_leaf": 50,
+   "max_features": "sqrt"
+  },
+  "dev2023": 84.5,
+  "dev2024": 80.7,
+  "mean_dev": 82.6,
+  "runner_up": {
+   "family": "logistic_regression",
+   "params": {
+    "penalty": "l1",
+    "C": 0.01
+   },
+   "mean_dev": 82.6
+  },
+  "best_other_family": {
+   "family": "logistic_regression",
+   "params": {
+    "penalty": "l1",
+    "C": 0.01
+   },
+   "mean_dev": 82.6
+  }
+ },
+ "4_main_table": {
+  "LR": {
+   "params": {
+    "penalty": "l1",
+    "C": 0.01
+   },
+   "dev2023": 85.0,
+   "dev2024": 80.1,
+   "test_R_at_K": 78.0,
+   "test_P_at_K": 32.1,
+   "test_R_at_K30": 56.3,
+   "test_auc": 0.74
+  },
+  "RF": {
+   "params": {
+    "max_depth": null,
+    "min_samples_leaf": 50,
+    "max_features": "sqrt"
+   },
+   "dev2023": 84.5,
+   "dev2024": 80.7,
+   "test_R_at_K": 79.2,
+   "test_P_at_K": 32.5,
+   "test_R_at_K30": 56.0,
+   "test_auc": 0.751
+  },
+  "GB": {
+   "params": {
+    "learning_rate": 0.03,
+    "max_leaf_nodes": 31,
+    "max_iter": 100,
+    "l2_regularization": 1
+   },
+   "dev2023": 82.9,
+   "dev2024": 81.9,
+   "test_R_at_K": 79.2,
+   "test_P_at_K": 32.5,
+   "test_R_at_K30": 56.6,
+   "test_auc": 0.749
+  },
+  "DT": {
+   "params": {
+    "max_depth": 5,
+    "min_samples_leaf": 200
+   },
+   "dev2023": 80.2,
+   "dev2024": 77.4,
+   "test_R_at_K": 75.9,
+   "test_P_at_K": 31.2,
+   "test_R_at_K30": 52.7,
+   "test_auc": 0.725
+  },
+  "LR5": {
+   "params": {
+    "penalty": "l1",
+    "C": 0.01
+   },
+   "dev2023": 77.0,
+   "dev2024": 76.2,
+   "test_R_at_K": 73.5,
+   "test_P_at_K": 30.2,
+   "test_R_at_K30": 51.2,
+   "test_auc": 0.707
+  },
+  "rule_history_rate": {
+   "dev2023": 77.5,
+   "dev2024": 77.1,
+   "test_R_at_K": 71.7,
+   "test_P_at_K": 29.5,
+   "test_R_at_K30": 50.3,
+   "test_auc": 0.693
+  },
+  "rule_last_result": {
+   "dev2023": 67.9,
+   "dev2024": 66.3,
+   "test_R_at_K": 68.1,
+   "test_P_at_K": 28.0,
+   "test_R_at_K30": 49.1,
+   "test_auc": 0.644
+  },
+  "rule_most_overdue": {
+   "dev2023": 61.5,
+   "dev2024": 56.6,
+   "test_R_at_K": 57.8,
+   "test_P_at_K": 23.8,
+   "test_R_at_K30": 37.3,
+   "test_auc": 0.568
+  }
+ },
+ "5_lead": {
+  "model_found_at_K": 263,
+  "rule_found_at_K": 238,
+  "lead_at_K": {
+   "points": 7.5,
+   "bootstrap_se": 2.46,
+   "ci95": [
+    2.7,
+    12.4
+   ]
+  },
+  "model_found_at_K30": 186,
+  "rule_found_at_K30": 167,
+  "lead_at_K30_points": 5.7,
+  "lr5_lead_at_K": {
+   "points": 1.8,
+   "bootstrap_se": 2.12,
+   "ci95": [
+    -2.4,
+    6.0
+   ]
+  },
+  "check_train_models_lead": {
+   "points": 7.5,
+   "bootstrap_se": 2.46,
+   "ci95": [
+    2.7,
+    12.4
+   ]
+  }
+ },
+ "6_subgroups": {
+  "groups": {
+   "inspection Aug-Dec 2025": {
+    "n": 794,
+    "serious": 183,
+    "model_found": 146,
+    "rule_found": 138,
+    "model_recall": 79.8,
+    "rule_recall": 75.4
+   },
+   "inspection Jan-Jul 2026": {
+    "n": 822,
+    "serious": 149,
+    "model_found": 117,
+    "rule_found": 100,
+    "model_recall": 78.5,
+    "rule_recall": 67.1
+   },
+   "City of Pittsburgh": {
+    "n": 580,
+    "serious": 139,
+    "model_found": 113,
+    "rule_found": 98,
+    "model_recall": 81.3,
+    "rule_recall": 70.5
+   },
+   "outside Pittsburgh": {
+    "n": 1036,
+    "serious": 193,
+    "model_found": 150,
+    "rule_found": 140,
+    "model_recall": 77.7,
+    "rule_recall": 72.5
+   },
+   "chain": {
+    "n": 763,
+    "serious": 128,
+    "model_found": 94,
+    "rule_found": 94,
+    "model_recall": 73.4,
+    "rule_recall": 73.4
+   },
+   "independent": {
+    "n": 853,
+    "serious": 204,
+    "model_found": 169,
+    "rule_found": 144,
+    "model_recall": 82.8,
+    "rule_recall": 70.6
+   },
+   "no routine history": {
+    "n": 104,
+    "serious": 25,
+    "model_found": 23,
+    "rule_found": 2,
+    "model_recall": 92.0,
+    "rule_recall": 8.0
+   },
+   "1-3 past routine inspections": {
+    "n": 485,
+    "serious": 100,
+    "model_found": 74,
+    "rule_found": 69,
+    "model_recall": 74.0,
+    "rule_recall": 69.0
+   },
+   "4+ past routine inspections": {
+    "n": 1027,
+    "serious": 207,
+    "model_found": 166,
+    "rule_found": 167,
+    "model_recall": 80.2,
+    "rule_recall": 80.7
+   }
+  },
+  "no_history_share_of_top_half": {
+   "model": 9.4,
+   "rule": 0.5
+  },
+  "no_history_in_top_half": {
+   "model": 76,
+   "rule": 4
+  },
+  "serious_found_any_history": {
+   "model": 240,
+   "rule": 236
+  },
+  "serious_found_chains": {
+   "model": 94,
+   "rule": 94
+  }
+ },
+ "7_most_overdue_found_at_K": 192,
+ "8_training_rows": {
+  "total": 23254,
+  "years": "2016-2024",
+  "rows_per_year_min": 1482,
+  "rows_per_year_max": 3552,
+  "serious_rate_min": 0.082,
+  "serious_rate_max": 0.163,
+  "known_before_test": 23088
+ },
+ "9_inspected_vs_not": {
+  "candidates": 4549,
+  "inspected": 1616,
+  "not_inspected": 2933,
+  "inspected_mean": {
+   "history_rate": 0.344,
+   "last_result": 0.589,
+   "overdue": 0.881,
+   "days_since_last_routine": 370.28,
+   "n_routine": 5.903
+  },
+  "not_inspected_mean": {
+   "history_rate": 0.344,
+   "last_result": 0.598,
+   "overdue": 1.451,
+   "days_since_last_routine": 562.279,
+   "n_routine": 5.202
+  }
+ },
+ "10_top5_importances": {
+  "mean_high_count": 0.163,
+  "recent_weighted_rate": 0.1033,
+  "last_result": 0.0685,
+  "max_high": 0.0667,
+  "mean_low": 0.064
+ }
+}
