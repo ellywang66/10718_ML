@@ -9,7 +9,8 @@ inspections Aug 11, 2025 - Jul 31, 2026 that could be linked to an old-system ID
 At Jan 1, 2025, predicted-not-inspected = candidates whose e is below the threshold that makes the predicted-inspected
 count equal the test inspected count. They are scored with the chosen violation model q (results/ml_results.json,
 fit as in train_models.py); flagged = q at or above the score of the K-th restaurant (K = 50%) in the test set.
-q is trained only on inspected restaurants. Writes results/line2_propensity.json.
+q is trained only on inspected restaurants. Writes results/line2_propensity.json and per-candidate scores to
+results/line2_scores.csv.
 """
 import json
 
@@ -95,7 +96,7 @@ def main():
                         test_note='inspected = in the linked test set (Comprehensive, Aug 11 2025 - Jul 31 2026, linked '
                                   'to an old-system ID); this undercounts inspections, so test AUC is approximate'),
         test_scoring_date=TEST_SCORING_DATE, candidates=int(len(fc)), test_inspected=n_insp, K=k,
-        violation_model=chosen, q_cutoff=round(cutoff, 5),
+        e_cutoff=round(float(fc.e[fc.pred_inspected].min()), 5), violation_model=chosen, q_cutoff=round(cutoff, 5),
         predicted_not_inspected=dict(n=int(len(pni)), flagged=int(flagged.sum()),
                                      flagged_share=round(float(flagged.mean()), 4), by_history=split,
                                      actually_inspected=int(pni.inspected.sum())),
@@ -104,6 +105,9 @@ def main():
         notes=['e is weak (see AUC); predicted-not-inspected is a ranking of e, not a confident prediction',
                'q is trained only on inspected restaurants; its scores for never-inspected restaurants are extrapolation'])
     (RESULTS / 'line2_propensity.json').write_text(json.dumps(out, indent=1))
+    scores = fc[['e', 'q', 'inspected', 'y', 'n_routine', 'pred_inspected']].round({'e': 5, 'q': 5})
+    scores['pred_inspected'], scores['y'] = scores.pred_inspected.astype(int), scores.y.astype('Int64')
+    scores.astype({'n_routine': int}).to_csv(RESULTS / 'line2_scores.csv')
     print(json.dumps(out, indent=1))
 
 

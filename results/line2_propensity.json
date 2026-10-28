@@ -101,6 +101,7 @@
  "candidates": 4549,
  "test_inspected": 1616,
  "K": 808,
+ "e_cutoff": 0.42636,
  "violation_model": {
   "family": "random_forest",
   "params": {
