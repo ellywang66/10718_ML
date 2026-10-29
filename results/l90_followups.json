@@ -1,0 +1,152 @@
+{
+ "chosen": {
+  "family": "gradient_boosting",
+  "params": {
+   "learning_rate": 0.03,
+   "max_leaf_nodes": 15,
+   "max_iter": 300,
+   "l2_regularization": 1
+  }
+ },
+ "target_recall": 0.9,
+ "line1": {
+  "dev2023": {
+   "n_inspected": 1658,
+   "serious": 187,
+   "target_found": 169,
+   "K90_rule": 1132,
+   "K90_model": 981,
+   "saved": 151,
+   "saved_bootstrap_se": 59.0,
+   "saved_ci95": [
+    35.0,
+    251.0
+   ],
+   "audit_pool": 3654,
+   "serious_base_rate": 0.1128,
+   "expected_serious_found_by_audit": 17.0
+  },
+  "dev2024": {
+   "n_inspected": 2157,
+   "serious": 332,
+   "target_found": 299,
+   "K90_rule": 1514,
+   "K90_model": 1334,
+   "saved": 180,
+   "saved_bootstrap_se": 76.8,
+   "saved_ci95": [
+    33.0,
+    338.0
+   ],
+   "audit_pool": 3441,
+   "serious_base_rate": 0.1539,
+   "expected_serious_found_by_audit": 27.7
+  },
+  "test": {
+   "n_inspected": 1616,
+   "serious": 332,
+   "target_found": 299,
+   "K90_rule": 1172,
+   "K90_model": 1049,
+   "saved": 123,
+   "saved_bootstrap_se": 41.5,
+   "saved_ci95": [
+    46.0,
+    209.02499999999986
+   ],
+   "audit_pool": 3500,
+   "serious_base_rate": 0.2054,
+   "expected_serious_found_by_audit": 25.3
+  }
+ },
+ "subgroups": {
+  "K": 1049,
+  "all": {
+   "model_found": 299,
+   "rule_found": 280
+  },
+  "Aug-Dec 2025": {
+   "n": 794,
+   "serious": 183,
+   "model_found": 163,
+   "rule_found": 156,
+   "model_in_top": 533,
+   "rule_in_top": 527
+  },
+  "Jan-Jul 2026": {
+   "n": 822,
+   "serious": 149,
+   "model_found": 136,
+   "rule_found": 124,
+   "model_in_top": 516,
+   "rule_in_top": 522
+  },
+  "Pittsburgh": {
+   "n": 580,
+   "serious": 139,
+   "model_found": 125,
+   "rule_found": 117,
+   "model_in_top": 394,
+   "rule_in_top": 396
+  },
+  "Elsewhere": {
+   "n": 1036,
+   "serious": 193,
+   "model_found": 174,
+   "rule_found": 163,
+   "model_in_top": 655,
+   "rule_in_top": 653
+  },
+  "Chain": {
+   "n": 763,
+   "serious": 128,
+   "model_found": 109,
+   "rule_found": 105,
+   "model_in_top": 425,
+   "rule_in_top": 470
+  },
+  "Independent": {
+   "n": 853,
+   "serious": 204,
+   "model_found": 190,
+   "rule_found": 175,
+   "model_in_top": 624,
+   "rule_in_top": 579
+  },
+  "No history": {
+   "n": 104,
+   "serious": 25,
+   "model_found": 25,
+   "rule_found": 25,
+   "model_in_top": 104,
+   "rule_in_top": 104
+  },
+  "1-3 past": {
+   "n": 485,
+   "serious": 100,
+   "model_found": 86,
+   "rule_found": 69,
+   "model_in_top": 307,
+   "rule_in_top": 241
+  },
+  "4+ past": {
+   "n": 1027,
+   "serious": 207,
+   "model_found": 188,
+   "rule_found": 186,
+   "model_in_top": 638,
+   "rule_in_top": 704
+  }
+ },
+ "line2": {
+  "q_cutoff": 0.07587,
+  "serious_above_cutoff": 299,
+  "serious": 332,
+  "predicted_not_inspected": 2933,
+  "uninspected_above_cutoff": 1905,
+  "predicted_not_inspected_above_cutoff": 1951,
+  "no_history": 421,
+  "no_history_above_cutoff": 417,
+  "no_history_q_median": 0.149
+ }
+}
