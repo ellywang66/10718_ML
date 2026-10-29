@@ -1,0 +1,71 @@
+{
+ "chosen": {
+  "family": "random_forest",
+  "params": {
+   "max_depth": null,
+   "min_samples_leaf": 50,
+   "max_features": "sqrt"
+  }
+ },
+ "assumption": "audited (uninspected) candidates violate at the serious base rate of inspected restaurants; not observed",
+ "dev2023": {
+  "n_inspected": 1658,
+  "serious": 187,
+  "K": 829,
+  "rule_found_at_K": 145,
+  "rule_recall_at_K": 0.7754,
+  "model_recall_at_K": 0.8449,
+  "K_model": 727,
+  "saved": 102,
+  "saved_share_of_K": 0.123,
+  "saved_bootstrap_se": 45.8,
+  "saved_ci95": [
+   30.0,
+   217.04999999999973
+  ],
+  "audit_pool": 3908,
+  "audit_slots": 102,
+  "serious_base_rate": 0.1128,
+  "expected_serious_found_by_audit": 11.5
+ },
+ "dev2024": {
+  "n_inspected": 2157,
+  "serious": 332,
+  "K": 1079,
+  "rule_found_at_K": 256,
+  "rule_recall_at_K": 0.7711,
+  "model_recall_at_K": 0.8072,
+  "K_model": 1025,
+  "saved": 54,
+  "saved_share_of_K": 0.05,
+  "saved_bootstrap_se": 55.3,
+  "saved_ci95": [
+   2.0,
+   209.04999999999973
+  ],
+  "audit_pool": 3750,
+  "audit_slots": 54,
+  "serious_base_rate": 0.1539,
+  "expected_serious_found_by_audit": 8.3
+ },
+ "test": {
+  "n_inspected": 1616,
+  "serious": 332,
+  "K": 808,
+  "rule_found_at_K": 238,
+  "rule_recall_at_K": 0.7169,
+  "model_recall_at_K": 0.7922,
+  "K_model": 678,
+  "saved": 130,
+  "saved_share_of_K": 0.1609,
+  "saved_bootstrap_se": 36.3,
+  "saved_ci95": [
+   59.0,
+   204.0
+  ],
+  "audit_pool": 3871,
+  "audit_slots": 130,
+  "serious_base_rate": 0.2054,
+  "expected_serious_found_by_audit": 26.7
+ }
+}

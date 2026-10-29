@@ -1,0 +1,150 @@
+{
+ "propensity": {
+  "fit_years": [
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2021,
+   2022
+  ],
+  "features": [
+   "history_rate",
+   "history_rate_3y",
+   "recent_weighted_rate",
+   "mean_high_count",
+   "last_result",
+   "days_since_last_routine",
+   "overdue",
+   "n_routine",
+   "n_routine_high",
+   "rate_last3",
+   "max_high",
+   "last_med",
+   "last_low",
+   "mean_med",
+   "mean_low",
+   "n_complaint_1y",
+   "n_complaint_all",
+   "n_reinspection_1y",
+   "high_nonroutine_1y",
+   "days_since_any",
+   "years_on_record",
+   "has_liquor",
+   "is_chain"
+  ],
+  "runs": {
+   "logistic_regression_C0.01": {
+    "auc_2023": 0.5829,
+    "auc_2024": 0.6508,
+    "auc_test": 0.6202
+   },
+   "logistic_regression_C0.1": {
+    "auc_2023": 0.5848,
+    "auc_2024": 0.6493,
+    "auc_test": 0.6169
+   },
+   "logistic_regression_C1": {
+    "auc_2023": 0.5851,
+    "auc_2024": 0.6491,
+    "auc_test": 0.6164
+   },
+   "gradient_boosting": {
+    "auc_2023": 0.6076,
+    "auc_2024": 0.6721,
+    "auc_test": 0.611
+   }
+  },
+  "selected": "gradient_boosting",
+  "rows": {
+   "2016": {
+    "n": 4538,
+    "inspected_rate": 0.783
+   },
+   "2017": {
+    "n": 4981,
+    "inspected_rate": 0.664
+   },
+   "2018": {
+    "n": 5031,
+    "inspected_rate": 0.631
+   },
+   "2019": {
+    "n": 5065,
+    "inspected_rate": 0.63
+   },
+   "2020": {
+    "n": 5037,
+    "inspected_rate": 0.374
+   },
+   "2021": {
+    "n": 4904,
+    "inspected_rate": 0.58
+   },
+   "2022": {
+    "n": 4768,
+    "inspected_rate": 0.311
+   },
+   "2023": {
+    "n": 4635,
+    "inspected_rate": 0.358
+   },
+   "2024": {
+    "n": 4775,
+    "inspected_rate": 0.452
+   }
+  },
+  "test_note": "inspected = in the linked test set (Comprehensive, Aug 11 2025 - Jul 31 2026, linked to an old-system ID); this undercounts inspections, so test AUC is approximate"
+ },
+ "test_scoring_date": "2025-01-01",
+ "candidates": 4549,
+ "test_inspected": 1616,
+ "K": 808,
+ "e_cutoff": 0.42636,
+ "violation_model": {
+  "family": "random_forest",
+  "params": {
+   "max_depth": null,
+   "min_samples_leaf": 50,
+   "max_features": "sqrt"
+  }
+ },
+ "q_cutoff": 0.11379,
+ "predicted_not_inspected": {
+  "n": 2933,
+  "flagged": 1606,
+  "flagged_share": 0.5476,
+  "by_history": {
+   "no routine history": {
+    "n": 227,
+    "flagged": 227
+   },
+   "1+ past routine inspections": {
+    "n": 2706,
+    "flagged": 1379
+   }
+  },
+  "actually_inspected": 925
+ },
+ "q_at_cutoff": {
+  "predicted_not_inspected_but_inspected": {
+   "n": 925,
+   "serious": 215,
+   "flagged": 509,
+   "recall": 0.8047,
+   "precision": 0.3399
+  },
+  "predicted_inspected": {
+   "n": 691,
+   "serious": 117,
+   "flagged": 299,
+   "recall": 0.7692,
+   "precision": 0.301
+  }
+ },
+ "notes": [
+  "e is weak (see AUC); predicted-not-inspected is a ranking of e, not a confident prediction",
+  "q is trained only on inspected restaurants; its scores for never-inspected restaurants are extrapolation"
+ ]
+}

@@ -1,0 +1,38 @@
+purpose,type
+Initial,routine
+"COVID-19, Initial Inspection",routine
+"Initial, Service Request",routine
+"Initial, Complaint",complaint
+"COVID-19, Complaint, Initial",complaint
+"Fish Fry, Complaint, Initial",complaint
+Complaint,complaint
+"COVID-19, Complaint",complaint
+"Complaint, Foodborne Illness",complaint
+"Complaint, Remodel",complaint
+"Fish Fry, Complaint",complaint
+"Fish Fry, Complaint, Foodborne Illness",complaint
+Foodborne Illness,complaint
+"Initial, Foodborne Illness",complaint
+Reinspection,reinspection
+Partial ReInspection,reinspection
+"Administrative Action, Reinspection",reinspection
+"COVID-19, Reinspection",reinspection
+"Reinspection, Complaint",reinspection
+"Reinspection, Service Request",reinspection
+"Reinspection, Foodborne Illness",reinspection
+"Remodel, Reinspection",reinspection
+"Fish Fry, Reinspection",reinspection
+New Facility,new_facility
+"Initial, New Facility",new_facility
+COVID-19 Assessment,other
+COVID-19,other
+Service Request,other
+Consultation,other
+Remodel,other
+"Remodel, Initial",other
+"Remodel, Service Request",other
+Administrative Action,other
+"Fish Fry, Initial Inspection",other
+Fish Fry Inspection,other
+Owner Requested Inspection,other
+Not Selected,other

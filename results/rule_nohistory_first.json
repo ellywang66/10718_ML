@@ -1,0 +1,79 @@
+{
+ "rule": "no-routine-history restaurants first, then history rate (rule tie-break)",
+ "dev": {
+  "2023": {
+   "variant": 73.8,
+   "history_rate_rule": 77.5,
+   "no_history": 123,
+   "n": 1658
+  },
+  "2024": {
+   "variant": 76.2,
+   "history_rate_rule": 77.1,
+   "no_history": 168,
+   "n": 2157
+  },
+  "mean_variant": 75.0,
+  "mean_history_rate_rule": 77.3
+ },
+ "test": {
+  "n": 1616,
+  "serious": 332,
+  "K": 808,
+  "R_at_K": 72.9,
+  "P_at_K": 30.0,
+  "R_at_K30": 48.8,
+  "auc": 0.683,
+  "found_at_K": 242,
+  "variant_minus_history_rate_rule": {
+   "points": 1.2,
+   "bootstrap_se": 1.95,
+   "ci95": [
+    -2.6,
+    5.0
+   ]
+  },
+  "chosen_model_minus_variant": {
+   "points": 6.3,
+   "bootstrap_se": 2.31,
+   "ci95": [
+    1.8,
+    10.8
+   ]
+  },
+  "chosen_model": {
+   "family": "random_forest",
+   "params": {
+    "max_depth": null,
+    "min_samples_leaf": 50,
+    "max_features": "sqrt"
+   }
+  },
+  "subgroups": {
+   "no routine history": {
+    "n": 104,
+    "serious": 25,
+    "variant_found": 25,
+    "variant_recall": 100.0,
+    "rule_recall": 8.0,
+    "model_recall": 92.0
+   },
+   "1-3 past routine inspections": {
+    "n": 485,
+    "serious": 100,
+    "variant_found": 61,
+    "variant_recall": 61.0,
+    "rule_recall": 69.0,
+    "model_recall": 74.0
+   },
+   "4+ past routine inspections": {
+    "n": 1027,
+    "serious": 207,
+    "variant_found": 156,
+    "variant_recall": 75.4,
+    "rule_recall": 80.7,
+    "model_recall": 80.2
+   }
+  }
+ }
+}
