@@ -1,0 +1,119 @@
+[
+ {
+  "block": "Time",
+  "subgroup": "Aug-Dec 2025",
+  "n": 794,
+  "serious": 183,
+  "model_l90": 68.0,
+  "rule_l90": 73.2,
+  "saved": 5.2,
+  "ci95": [
+   -1.5,
+   11.5
+  ]
+ },
+ {
+  "block": "Time",
+  "subgroup": "Jan-Jul 2026",
+  "n": 822,
+  "serious": 149,
+  "model_l90": 61.1,
+  "rule_l90": 72.7,
+  "saved": 11.7,
+  "ci95": [
+   2.8,
+   18.7
+  ]
+ },
+ {
+  "block": "Location",
+  "subgroup": "Pittsburgh",
+  "n": 580,
+  "serious": 139,
+  "model_l90": 69.3,
+  "rule_l90": 74.7,
+  "saved": 5.3,
+  "ci95": [
+   -0.5,
+   17.1
+  ]
+ },
+ {
+  "block": "Location",
+  "subgroup": "Elsewhere",
+  "n": 1036,
+  "serious": 193,
+  "model_l90": 63.2,
+  "rule_l90": 73.4,
+  "saved": 10.1,
+  "ci95": [
+   2.4,
+   16.3
+  ]
+ },
+ {
+  "block": "Type",
+  "subgroup": "Chain",
+  "n": 763,
+  "serious": 128,
+  "model_l90": 62.6,
+  "rule_l90": 69.3,
+  "saved": 6.7,
+  "ci95": [
+   -4.6,
+   15.2
+  ]
+ },
+ {
+  "block": "Type",
+  "subgroup": "Independent",
+  "n": 853,
+  "serious": 204,
+  "model_l90": 69.8,
+  "rule_l90": 75.7,
+  "saved": 6.0,
+  "ci95": [
+   -0.4,
+   13.1
+  ]
+ },
+ {
+  "block": "Past routine inspections",
+  "subgroup": "None",
+  "n": 104,
+  "serious": 25,
+  "model_l90": 76.0,
+  "rule_l90": 89.4,
+  "saved": 13.5,
+  "ci95": [
+   -7.7,
+   38.5
+  ]
+ },
+ {
+  "block": "Past routine inspections",
+  "subgroup": "1-3",
+  "n": 485,
+  "serious": 100,
+  "model_l90": 68.2,
+  "rule_l90": 76.7,
+  "saved": 8.5,
+  "ci95": [
+   -7.2,
+   17.3
+  ]
+ },
+ {
+  "block": "Past routine inspections",
+  "subgroup": "4+",
+  "n": 1027,
+  "serious": 207,
+  "model_l90": 61.6,
+  "rule_l90": 70.8,
+  "saved": 9.2,
+  "ci95": [
+   0.3,
+   14.6
+  ]
+ }
+]
